@@ -1,0 +1,85 @@
+{
+  "masterKey": {
+    "name": "master",
+    "value": "yzuj0uOy4qlJWOS_GLGShsA9H6iJdnkSTEfbprGIP6kbAzFuYuKnSg==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "dikdDckF22YSW4fNGTD0tCydBxddu5vGF9UMQq9ZMNJ5AzFuEhL5XA==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [],
+  "hostName": "localhost:7071",
+  "instanceId": "0000000000000000000000000890D811",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}{
+  "masterKey": {
+    "name": "master",
+    "value": "yzuj0uOy4qlJWOS_GLGShsA9H6iJdnkSTEfbprGIP6kbAzFuYuKnSg==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "dikdDckF22YSW4fNGTD0tCydBxddu5vGF9UMQq9ZMNJ5AzFuEhL5XA==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [
+    {
+      "name": "signalr_extension",
+      "value": "WGMbkpgcV7DtOpmdiGC09h9K_jTdlt0xa3OlLzcx9jBsAzFuYx3tfw==",
+      "encrypted": false
+    }
+  ],
+  "hostName": "localhost:7071",
+  "instanceId": "0000000000000000000000000890D811",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}{"Last":"0001-01-01T00:00:00","Next":"2023-07-04T19:00:49+01:00","LastUpdated":"2023-07-04T18:27:48.3900503+01:00"}{"Last":"0001-01-01T00:00:00","Next":"2023-07-04T18:30:00+01:00","LastUpdated":"2023-07-04T18:29:42.5631607+01:00"}{"Last":"2023-07-04T18:30:00.0414976+01:00","Next":"2023-07-04T18:31:00+01:00","LastUpdated":"2023-07-04T18:30:00.0414976+01:00"}{"Last":"2023-07-04T18:31:00.0089422+01:00","Next":"2023-07-04T18:32:00+01:00","LastUpdated":"2023-07-04T18:31:00.0089422+01:00"}{"Last":"2023-07-04T18:32:00.0227344+01:00","Next":"2023-07-04T18:33:00+01:00","LastUpdated":"2023-07-04T18:32:00.0227344+01:00"}{"Last":"2023-07-04T18:33:00.0107026+01:00","Next":"2023-07-04T18:34:00+01:00","LastUpdated":"2023-07-04T18:33:00.0107026+01:00"}{"Last":"2023-07-04T18:34:00.0136485+01:00","Next":"2023-07-04T18:35:00+01:00","LastUpdated":"2023-07-04T18:34:00.0136485+01:00"}{"Last":"2023-07-04T18:35:00.0077657+01:00","Next":"2023-07-04T18:36:00+01:00","LastUpdated":"2023-07-04T18:35:00.0077657+01:00"}{"Last":"2023-07-04T18:36:00.0058126+01:00","Next":"2023-07-04T18:37:00+01:00","LastUpdated":"2023-07-04T18:36:00.0058126+01:00"}{"Last":"2023-07-04T18:37:00.0086661+01:00","Next":"2023-07-04T18:38:00+01:00","LastUpdated":"2023-07-04T18:37:00.0086661+01:00"}{"Last":"2023-07-04T18:38:00.0120072+01:00","Next":"2023-07-04T18:39:00+01:00","LastUpdated":"2023-07-04T18:38:00.0120072+01:00"}{"Last":"2023-07-04T18:39:00.0187004+01:00","Next":"2023-07-04T18:40:00+01:00","LastUpdated":"2023-07-04T18:39:00.0187004+01:00"}{"Last":"2023-07-04T18:40:00.0267131+01:00","Next":"2023-07-04T18:41:00+01:00","LastUpdated":"2023-07-04T18:40:00.0267131+01:00"}{"Last":"2023-07-04T18:41:00.0057951+01:00","Next":"2023-07-04T18:42:00+01:00","LastUpdated":"2023-07-04T18:41:00.0057951+01:00"}{"Last":"2023-07-04T18:42:00.0231453+01:00","Next":"2023-07-04T18:43:00+01:00","LastUpdated":"2023-07-04T18:42:00.0231453+01:00"}{"Last":"2023-07-04T18:43:00.0083101+01:00","Next":"2023-07-04T18:44:00+01:00","LastUpdated":"2023-07-04T18:43:00.0083101+01:00"}{"Last":"2023-07-04T18:44:00.0123499+01:00","Next":"2023-07-04T18:45:00+01:00","LastUpdated":"2023-07-04T18:44:00.0123499+01:00"}{
+  "masterKey": {
+    "name": "master",
+    "value": "C5pVxNgp6mp3Up5Al3Gjpb1A_K9M9JI2rYWS1iLesBuzAzFuNRPycQ==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "UzEJNdygK8vBwk_EAy1N-COruvvNLILp_zqCLK2lPN0PAzFuPqCjSg==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [],
+  "hostName": "localhost:7071",
+  "instanceId": "0000000000000000000000000890D811",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}{
+  "masterKey": {
+    "name": "master",
+    "value": "C5pVxNgp6mp3Up5Al3Gjpb1A_K9M9JI2rYWS1iLesBuzAzFuNRPycQ==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "UzEJNdygK8vBwk_EAy1N-COruvvNLILp_zqCLK2lPN0PAzFuPqCjSg==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [
+    {
+      "name": "signalr_extension",
+      "value": "f7HlXFfK7PDv2S8hjO16hVRDZK6BKLGqJ9MxHhRPQcDZAzFuEc9KHg==",
+      "encrypted": false
+    }
+  ],
+  "hostName": "localhost:7071",
+  "instanceId": "0000000000000000000000000890D811",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}
