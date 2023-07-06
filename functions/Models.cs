@@ -1,4 +1,5 @@
-using System;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace HorizonMode.GymScreens
 {
@@ -14,11 +15,9 @@ namespace HorizonMode.GymScreens
         public int CurrentRestTime { get; set; }
     }
 
-    public class Screen
+    public class Screen : Dto
     {
-        public string Id { get; set; }
         public string Tag { get; set; }
-        public string DeviceId { get; set; }
     }
 
     public class Programme : Dto
@@ -26,15 +25,15 @@ namespace HorizonMode.GymScreens
         public string Name { get; set; }
         public int ActiveTime { get; set; }
         public int RestTime { get; set; }
+        public List<ScreenMapping> Mappings { get; set; } = new List<ScreenMapping>();
     }
 
-    public class ScreenMapping : Dto
+    public class ScreenMapping
     {
-        public string ProgrammeId { get; set; }
-        public string ScreenId { get; set; }
+        public Screen Screen { get; set; }
         public bool SplitScreen { get; set; }
-        public string Exercise1Id { get; set; }
-        public string Exercise2Id { get; set; }
+        public Exercise Exercise1 { get; set; }
+        public Exercise Exercise2 { get; set; }
     }
 
     public class Exercise : Dto
@@ -45,11 +44,7 @@ namespace HorizonMode.GymScreens
 
     public class Dto
     {
+        [JsonProperty("id")]
         public string Id { get; set; }
-
-        public Dto()
-        {
-            Id = Guid.NewGuid().ToString();
-        }
     }
 }

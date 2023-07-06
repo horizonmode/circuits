@@ -53,7 +53,6 @@ export default function Home() {
       >
         <video
           className="h-screen outline-none"
-          style={{ clipPath: "inset(1px 1px);" }}
           src="https://tiktokvideos.blob.core.windows.net/videos/Back and Shoulders Stretch_female_1_1.mp4"
           autoPlay
           playsInline

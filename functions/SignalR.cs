@@ -22,12 +22,19 @@ namespace HorizonMode.GymScreens
         [FunctionName("broadcast")]
         public static async Task Broadcast([TimerTrigger("* * * * * *")] TimerInfo myTimer,
         [SignalR(HubName = "serverless_dev")] IAsyncCollector<SignalRMessage> signalRMessages,
-         [Table("Workouts", "programmes")] TableClient tableClient, ILogger log)
+        [CosmosDB(
+                databaseName: "screens",
+                collectionName: "programmes",
+                Id = "active",
+                PartitionKey ="active",
+                ConnectionStringSetting = "CosmosDBConnection")] ActiveProgramme workout,
+                [CosmosDB(
+                databaseName: "screens",
+                collectionName: "programmes",
+                ConnectionStringSetting = "CosmosDBConnection")]
+                IAsyncCollector<ActiveProgramme> programmesOut,
+                ILogger log)
         {
-            var tableData = tableClient.Query<TableEntity>(filter: $"RowKey eq 'active'", maxPerPage: 10).FirstOrDefault();
-            if (tableData == null) return;
-
-            var workout = Utils<ActiveProgramme>.GetDto(tableData);
 
             if (workout.CurrentActiveTime <= 0 && workout.CurrentRestTime <= 0)
             {
@@ -38,8 +45,7 @@ namespace HorizonMode.GymScreens
             var mode = workout.CurrentActiveTime > 0 ? "active" : "rest";
             var timeLeft = workout.CurrentActiveTime <= 0 ? workout.CurrentRestTime-- : workout.CurrentActiveTime--;
 
-            var entity = Utils<ActiveProgramme>.GetTableEntity(workout, TableKeys.ProgrammeKey, "active");
-            tableClient.UpsertEntity<TableEntity>(entity);
+            await programmesOut.AddAsync(workout);
 
             log.LogInformation($"{timeLeft}");
             await signalRMessages.AddAsync(
