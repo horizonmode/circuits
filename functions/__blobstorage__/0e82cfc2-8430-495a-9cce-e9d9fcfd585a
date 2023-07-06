@@ -1,0 +1,59 @@
+{
+  "masterKey": {
+    "name": "master",
+    "value": "yzuj0uOy4qlJWOS_GLGShsA9H6iJdnkSTEfbprGIP6kbAzFuYuKnSg==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "dikdDckF22YSW4fNGTD0tCydBxddu5vGF9UMQq9ZMNJ5AzFuEhL5XA==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [
+    {
+      "name": "signalr_extension",
+      "value": "WGMbkpgcV7DtOpmdiGC09h9K_jTdlt0xa3OlLzcx9jBsAzFuYx3tfw==",
+      "encrypted": false
+    },
+    {
+      "name": "blobs_extension",
+      "value": "hrp-_0wyTwFpZDrRrRftRYVpUR14nPy8NX3V5OnztlqFAzFu59bQaA==",
+      "encrypted": false
+    }
+  ],
+  "hostName": "localhost:7071",
+  "instanceId": "0000000000000000000000000890D811",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}{
+  "masterKey": {
+    "name": "master",
+    "value": "C5pVxNgp6mp3Up5Al3Gjpb1A_K9M9JI2rYWS1iLesBuzAzFuNRPycQ==",
+    "encrypted": false
+  },
+  "functionKeys": [
+    {
+      "name": "default",
+      "value": "UzEJNdygK8vBwk_EAy1N-COruvvNLILp_zqCLK2lPN0PAzFuPqCjSg==",
+      "encrypted": false
+    }
+  ],
+  "systemKeys": [
+    {
+      "name": "signalr_extension",
+      "value": "f7HlXFfK7PDv2S8hjO16hVRDZK6BKLGqJ9MxHhRPQcDZAzFuEc9KHg==",
+      "encrypted": false
+    },
+    {
+      "name": "blobs_extension",
+      "value": "RPBy17a1GvSkdVWB2XFVjceZqN4frsDlxrzf7OcnSnYwAzFuyf6NMg==",
+      "encrypted": false
+    }
+  ],
+  "hostName": "localhost:7071",
+  "instanceId": "0000000000000000000000000890D811",
+  "source": "runtime",
+  "decryptionKeyId": ""
+}

@@ -23,7 +23,7 @@ export default function Home() {
     initKeepAwake();
 
     const connection = new HubConnectionBuilder()
-      .withUrl("https://signalromm.azurewebsites.net/api")
+      .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/api`)
       .configureLogging(LogLevel.Information)
       .build();
     connection.on("newMessage", (message, mode) => {
@@ -40,7 +40,7 @@ export default function Home() {
 
   return (
     <main className="flex min-h-screen max-h-screen flex-col items-center align-middle justify-center bg-gradient-to-r from-gray-200">
-      <div className="fixed flex flex-col justify-center items-right top-0 w-screen">
+      <div className="fixed z-10 flex flex-col justify-center items-right top-0 w-screen">
         <h2
           className={`pr-3 pt-3 text-6xl font-semibold text-center w-full text-slate-500`}
         >
@@ -52,7 +52,8 @@ export default function Home() {
         className="w-screen flex flex-row items-center justify-center"
       >
         <video
-          className="h-screen"
+          className="h-screen outline-none"
+          style={{ clipPath: "inset(1px 1px);" }}
           src="https://tiktokvideos.blob.core.windows.net/videos/Back and Shoulders Stretch_female_1_1.mp4"
           autoPlay
           playsInline
