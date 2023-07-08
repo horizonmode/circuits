@@ -12,7 +12,7 @@ using Newtonsoft.Json;
 
 namespace HorizonMode.GymScreens
 {
-    public static class Function
+    public static class Programmes
     {
         [FunctionName("SetActiveProgramme")]
         public static IActionResult SetActiveWorkout([HttpTrigger(methods: "get", Route = "programme/setActive/{id}")] HttpRequest req,
@@ -91,13 +91,24 @@ namespace HorizonMode.GymScreens
             programme.Id = Guid.NewGuid().ToString();
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var collectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
+            var exerciseCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
+            var screenCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
 
             foreach (var screenMap in programme.Mappings)
             {
                 if (screenMap.Screen == null || screenMap.Screen.Tag == null) return new BadRequestResult();
 
-                var exercise1 = client.CreateDocumentQuery<Exercise>(collectionUri, option).Where(t => t.Id == screenMap.Exercise1.Id)
+                var screen = client.CreateDocumentQuery<Screen>(screenCollectionUri, option).Where(t => t.Id == screenMap.Screen.Id)
+                      .AsEnumerable().FirstOrDefault();
+
+                if (screen == null)
+                {
+                    return new BadRequestResult();
+                }
+
+                screenMap.Screen.Tag = screen.Tag;
+
+                var exercise1 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise1.Id)
                       .AsEnumerable().FirstOrDefault();
 
                 if (exercise1 == null)
@@ -110,7 +121,7 @@ namespace HorizonMode.GymScreens
 
                 if (!screenMap.SplitScreen) continue;
 
-                var exercise2 = client.CreateDocumentQuery<Exercise>(collectionUri, option).Where(t => t.Id == screenMap.Exercise2.Id)
+                var exercise2 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise2.Id)
                                       .AsEnumerable().FirstOrDefault();
 
                 if (exercise2 == null)

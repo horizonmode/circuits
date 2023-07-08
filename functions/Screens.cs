@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Data.Tables;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Documents.Client;
@@ -12,28 +13,28 @@ using Newtonsoft.Json;
 
 namespace HorizonMode.GymScreens
 {
-    public static class Exercises
+    public static class Screens
     {
-        [FunctionName("GetExercises")]
-        public static IActionResult GetExercises([HttpTrigger(methods: "get", Route = "exercise")] HttpRequest req,
+        [FunctionName("GetScreens")]
+        public static IActionResult GetScreens([HttpTrigger(methods: "get", Route = "screen")] HttpRequest req,
         [CosmosDB(
                 databaseName: "screens",
-                collectionName: "exercises",
+                collectionName: "screens",
                 ConnectionStringSetting = "CosmosDBConnection",
                 SqlQuery = "SELECT * FROM c order by c._ts desc")]
-                IEnumerable<Exercise> exercises, ILogger log)
+                IEnumerable<Screen> Screens, ILogger log)
         {
-            log.LogInformation($"GetExercises function processed");
+            log.LogInformation($"GetScreens function processed");
 
-            return new OkObjectResult(exercises);
+            return new OkObjectResult(Screens);
         }
 
-        [FunctionName("CreateExercise")]
-        public static IActionResult CreateExercise([HttpTrigger(methods: "post", Route = "exercise")] HttpRequest req,
+        [FunctionName("CreateScreen")]
+        public static IActionResult CreateScreen([HttpTrigger(methods: "post", Route = "screen")] HttpRequest req,
          [CosmosDB(
                 databaseName: "screens",
-                collectionName: "exercises",
-                ConnectionStringSetting = "CosmosDBConnection")] out Exercise exercise)
+                collectionName: "screens",
+                ConnectionStringSetting = "CosmosDBConnection")] out Screen Screen)
         {
 
             string requestBody = String.Empty;
@@ -42,23 +43,22 @@ namespace HorizonMode.GymScreens
                 requestBody = streamReader.ReadToEnd();
             }
 
-            Exercise data = JsonConvert.DeserializeObject<Exercise>(requestBody);
-            exercise = data;
-            exercise.Id = Guid.NewGuid().ToString();
+            Screen data = JsonConvert.DeserializeObject<Screen>(requestBody);
+            Screen = data;
+            Screen.Id = Guid.NewGuid().ToString();
 
-            // Handle screen maps
-            return new CreatedResult($"/excercise/{data.Id}", data);
+            return new CreatedResult($"/screen/{data.Id}", data);
         }
 
-        [FunctionName("UpdateExercise")]
-        public static IActionResult UpdateExercise(
-         [HttpTrigger(methods: "put", Route = "exercise/{id}")] HttpRequest req,
+        [FunctionName("UpdateScreen")]
+        public static IActionResult UpdateScreen(
+         [HttpTrigger(methods: "put", Route = "screen/{id}")] HttpRequest req,
           [CosmosDB(
                 databaseName: "screens",
-                collectionName: "exercises",
+                collectionName: "screens",
                 Id = "{id}",
                 PartitionKey ="{id}",
-                ConnectionStringSetting = "CosmosDBConnection")] out Exercise exercise,
+                ConnectionStringSetting = "CosmosDBConnection")] out Screen Screen,
                 ILogger logger, string id)
         {
             var requestBody = string.Empty;
@@ -67,19 +67,19 @@ namespace HorizonMode.GymScreens
                 requestBody = streamReader.ReadToEnd();
             }
 
-            exercise = JsonConvert.DeserializeObject<Exercise>(requestBody);
-            return new OkObjectResult(exercise);
+            Screen = JsonConvert.DeserializeObject<Screen>(requestBody);
+            return new OkObjectResult(Screen);
         }
 
-        [FunctionName("DeleteExercise")]
+        [FunctionName("DeleteScreen")]
         public async static Task<IActionResult> DeleteBook(
-            [HttpTrigger(methods: "delete", Route = "exercise/{id}")] HttpRequest req,
+            [HttpTrigger(methods: "delete", Route = "screen/{id}")] HttpRequest req,
             [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
             ILogger logger, string id)
         {
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var collectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
+            var collectionUri = UriFactory.CreateDocumentCollectionUri("screens", "Screens");
 
             var document = client.CreateDocumentQuery(collectionUri, option).Where(t => t.Id == id)
                   .AsEnumerable().FirstOrDefault();

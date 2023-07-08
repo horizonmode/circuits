@@ -18,6 +18,7 @@ namespace HorizonMode.GymScreens
     public class Screen : Dto
     {
         public string Tag { get; set; }
+        public string DeviceId { get; set; }
     }
 
     public class Programme : Dto
