@@ -13,6 +13,7 @@ namespace HorizonMode.GymScreens
     {
         public int CurrentActiveTime { get; set; }
         public int CurrentRestTime { get; set; }
+        public string SourceWorkoutId { get; set; }
     }
 
     public class Screen : Dto

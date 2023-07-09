@@ -37,6 +37,7 @@ namespace HorizonMode.GymScreens
             ap.Mappings = programme.Mappings;
             ap.RestTime = programme.RestTime;
             ap.Id = "active";
+            ap.SourceWorkoutId = programme.Id;
 
             activeProgramme = ap;
 
@@ -53,6 +54,20 @@ namespace HorizonMode.GymScreens
                 PartitionKey = "{id}")] Programme programme, ILogger log)
         {
             log.LogInformation($"GetProgrammeById function processed");
+
+            return new OkObjectResult(programme);
+        }
+
+        [FunctionName("GetActiveProgramme")]
+        public static IActionResult GetActiveProgramme([HttpTrigger(methods: "get", Route = "programme/getActive")] HttpRequest req,
+      [CosmosDB(
+                databaseName: "screens",
+                collectionName: "programmes",
+                ConnectionStringSetting = "CosmosDBConnection",
+                Id = "active",
+                PartitionKey = "active")] ActiveProgramme programme, ILogger log)
+        {
+            log.LogInformation($"GetActiveProgramme function processed");
 
             return new OkObjectResult(programme);
         }
@@ -92,13 +107,13 @@ namespace HorizonMode.GymScreens
 
             var option = new FeedOptions { EnableCrossPartitionQuery = true };
             var exerciseCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
-            var screenCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
+            var screenCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "screens");
 
             foreach (var screenMap in programme.Mappings)
             {
                 if (screenMap.Screen == null || screenMap.Screen.Tag == null) return new BadRequestResult();
 
-                var screen = client.CreateDocumentQuery<Screen>(screenCollectionUri, option).Where(t => t.Id == screenMap.Screen.Id)
+                var screen = client.CreateDocumentQuery<Screen>(screenCollectionUri, option).Where(t => t.Tag == screenMap.Screen.Tag)
                       .AsEnumerable().FirstOrDefault();
 
                 if (screen == null)
@@ -106,7 +121,7 @@ namespace HorizonMode.GymScreens
                     return new BadRequestResult();
                 }
 
-                screenMap.Screen.Tag = screen.Tag;
+                screenMap.Screen.Id = screen.Id;
 
                 var exercise1 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise1.Id)
                       .AsEnumerable().FirstOrDefault();

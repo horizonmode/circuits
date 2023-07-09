@@ -52,7 +52,7 @@ namespace HorizonMode.GymScreens
                 new SignalRMessage
                 {
                     Target = "newMessage",
-                    Arguments = new[] { $"{timeLeft}", $"{mode}", $"{workout.Id}" }
+                    Arguments = new[] { $"{timeLeft}", $"{mode}", $"{workout.SourceWorkoutId}" }
                 });
         }
     }
