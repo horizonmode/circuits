@@ -8,7 +8,6 @@ import {
 } from "@microsoft/signalr";
 import { Exercise, Programme } from "./types";
 import { Preferences } from "@capacitor/preferences";
-import { setSourceMapRange } from "typescript";
 import Modal from "@/components/modal";
 import Loader from "@/components/loader";
 
@@ -35,7 +34,9 @@ export default function Home() {
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
-      .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/api`)
+      .withUrl(
+        `${process.env.NEXT_PUBLIC_API_URL}/api?code=${process.env.NEXT_PUBLIC_API_KEY}`
+      )
       .configureLogging(LogLevel.Information)
       .build();
     connection.on("newMessage", (message, mode, workoutId) => {
@@ -60,7 +61,6 @@ export default function Home() {
     }
   }, [programmeId, programme]);
 
-  // JSON "set" example
   const SetScreenStore = async (screenTag: string) => {
     await Preferences.set({
       key: "screen",
@@ -68,7 +68,6 @@ export default function Home() {
     });
   };
 
-  // JSON "get" example
   const GetScreen = async () => {
     const ret = await Preferences.get({ key: "screen" });
     return ret.value;
@@ -95,7 +94,7 @@ export default function Home() {
 
   const fetchProgramme = async () => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/programme/getActive`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/programme/getActive?code=${process.env.NEXT_PUBLIC_API_KEY}`
     );
     const progJson = (await res.json()) as Programme;
     setProgramme(progJson);
