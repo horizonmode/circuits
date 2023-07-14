@@ -1,33 +1,38 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Programme } from "../types";
-import FileUploadSingle from "@/components/upload";
 import Arrow from "../../assets/arrow.svg";
-import EditIcon from "../../assets/edit.svg";
 import Icon from "@/components/icon";
+import Link from "next/link";
+import Modal from "@/components/modal";
+import { useRouter } from "next/navigation";
+import Loader from "@/components/loader";
 
 export default function Admin() {
   const [programmes, setProgrammes] = useState<Programme[]>([]);
   const [activeProgramme, setActiveProgramme] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const fetchProgrammes = async () => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/programme`);
+    const data = await res.json();
+    setProgrammes(data);
+  };
+
+  const fetchActiveProgramme = async () => {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/programme/getActive`
+    );
+    if (!res.ok) return;
+    const data = await res.json();
+    setActiveProgramme(data.sourceWorkoutId);
+  };
+
   useEffect(() => {
-    const fetchProgrammes = async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/programme`
-      );
-      const data = await res.json();
-      setProgrammes(data);
-    };
-
-    const fetchActiveProgramme = async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/programme/getActive`
-      );
-      const data = await res.json();
-      setActiveProgramme(data.sourceWorkoutId);
-    };
-
+    setLoading(true);
     fetchProgrammes();
     fetchActiveProgramme();
+    setLoading(false);
   }, []);
 
   const setNewActive = (workoutId: string) => {
@@ -36,52 +41,90 @@ export default function Admin() {
         `${process.env.NEXT_PUBLIC_API_URL}/api/programme/setActive/${workoutId}`
       );
       const data = await res.json();
-      console.log(workoutId);
       setActiveProgramme(workoutId);
     };
 
     send();
   };
 
+  const deleteProgramme = async (id: string) => {
+    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/programme/${id}`, {
+      method: "DELETE",
+    });
+    await fetchProgrammes();
+    await fetchActiveProgramme();
+  };
+
+  const [showModal, setShowModal] = useState<boolean>(false);
+  const [selectedProgrammeId, setSelectedProgrammeId] = useState<string>("");
+
+  const selectForDelete = (id: string) => {
+    setSelectedProgrammeId(id);
+    setShowModal(true);
+  };
+
+  const router = useRouter();
+
   return (
     <main className="flex flex-col items-left align-left ">
-      <div className="flex flex-col gap-5 ">
-        {programmes.map((p: Programme, i: number) => {
-          return activeProgramme === p.id ? (
+      {loading ? (
+        <Loader />
+      ) : (
+        <div className="flex flex-col gap-5 ">
+          {programmes.map((p: Programme, i: number) => (
             <div
               key={`programme-${i}`}
-              className="w-full relative lg:w-1/2 h-20 bg-gradient-to-r from-powder to-powder-300 flex align-middle items-center justify-start p-10 rounded-md"
+              className={`w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-10 rounded-md ${
+                activeProgramme === p.id
+                  ? " from-powder to-powder-300"
+                  : " from-gray-400 to-gray-50"
+              }`}
               onClick={() => setNewActive(p.id)}
             >
               <span className="text-lg w-4/5">{p.name}</span>
               <div
                 className={`absolute -left-20 bg-no-repeat bg-contain w-20 h-20 top-1/2 -translate-y-1/2 sm:none flex align-middle`}
               >
-                <Arrow />
+                {activeProgramme === p.id && <Arrow />}
               </div>
               <div className="flex flex-row justify-start gap-2">
-                <Icon type="edit" />
-                <Icon type="del" />
+                <Icon
+                  type="edit"
+                  onClick={() => router.push(`/admin/programmes/edit/${p.id}`)}
+                />
+                <Icon type="del" onClick={() => selectForDelete(p.id)} />
               </div>
             </div>
-          ) : (
-            <div
-              key={`programme-${i}`}
-              className="w-full lg:w-1/2 h-20 bg-gradient-to-r from-gray-400 to-gray-50 flex align-middle items-center justify-start p-10  hover:outline rounded-md"
-              onClick={() => setNewActive(p.id)}
+          ))}
+          <div className="w-full relative lg:w-1/2 h-20 flex align-middle justify-center">
+            <Link
+              href={{
+                pathname: `/admin/programmes/create`,
+              }}
             >
-              <span className="text-lg w-4/5">{p.name}</span>
-              <div className="flex flex-row justify-start gap-2">
-                <Icon type="edit" />
-                <Icon type="del" />
-              </div>
-            </div>
-          );
-        })}
-        <div className="w-full relative lg:w-1/2 h-20 flex align-middle justify-center">
-          <Icon type="add" />
+              <Icon type="add" />
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
+      {showModal && (
+        <Modal
+          happy={false}
+          title="are you sure"
+          okText="Yes"
+          showCancel={true}
+          onAccept={() => {
+            deleteProgramme(selectedProgrammeId);
+            setShowModal(false);
+          }}
+          onCancel={() => {
+            setShowModal(false);
+            setSelectedProgrammeId("");
+          }}
+        >
+          <div>Are you sure you want to delete this programme?</div>
+        </Modal>
+      )}
     </main>
   );
 }

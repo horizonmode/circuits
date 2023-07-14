@@ -27,6 +27,7 @@ namespace HorizonMode.GymScreens
         public string Name { get; set; }
         public int ActiveTime { get; set; }
         public int RestTime { get; set; }
+        public string Message { get; set; }
         public List<ScreenMapping> Mappings { get; set; } = new List<ScreenMapping>();
     }
 
@@ -42,6 +43,8 @@ namespace HorizonMode.GymScreens
     {
         public string Name { get; set; }
         public string VideoUrl { get; set; }
+        public string VideoFileName { get; set; }
+        public string Title { get; set; }
     }
 
     public class Dto

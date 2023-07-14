@@ -19,41 +19,41 @@ namespace HorizonMode.GymScreens
             return connectionInfo;
         }
 
-        [FunctionName("broadcast")]
-        public static async Task Broadcast([TimerTrigger("* * * * * *")] TimerInfo myTimer,
-        [SignalR(HubName = "serverless_dev")] IAsyncCollector<SignalRMessage> signalRMessages,
-        [CosmosDB(
-                databaseName: "screens",
-                collectionName: "programmes",
-                Id = "active",
-                PartitionKey ="active",
-                ConnectionStringSetting = "CosmosDBConnection")] ActiveProgramme workout,
-                [CosmosDB(
-                databaseName: "screens",
-                collectionName: "programmes",
-                ConnectionStringSetting = "CosmosDBConnection")]
-                IAsyncCollector<ActiveProgramme> programmesOut,
-                ILogger log)
-        {
+        // [FunctionName("broadcast")]
+        // public static async Task Broadcast([TimerTrigger("* * * * * *")] TimerInfo myTimer,
+        // [SignalR(HubName = "serverless_dev")] IAsyncCollector<SignalRMessage> signalRMessages,
+        // [CosmosDB(
+        //         databaseName: "screens",
+        //         collectionName: "programmes",
+        //         Id = "active",
+        //         PartitionKey ="active",
+        //         ConnectionStringSetting = "CosmosDBConnection")] ActiveProgramme workout,
+        //         [CosmosDB(
+        //         databaseName: "screens",
+        //         collectionName: "programmes",
+        //         ConnectionStringSetting = "CosmosDBConnection")]
+        //         IAsyncCollector<ActiveProgramme> programmesOut,
+        //         ILogger log)
+        // {
 
-            if (workout.CurrentActiveTime <= 0 && workout.CurrentRestTime <= 0)
-            {
-                workout.CurrentActiveTime = workout.ActiveTime;
-                workout.CurrentRestTime = workout.RestTime;
-            }
+        //     if (workout.CurrentActiveTime <= 0 && workout.CurrentRestTime <= 0)
+        //     {
+        //         workout.CurrentActiveTime = workout.ActiveTime;
+        //         workout.CurrentRestTime = workout.RestTime;
+        //     }
 
-            var mode = workout.CurrentActiveTime > 0 ? "active" : "rest";
-            var timeLeft = workout.CurrentActiveTime <= 0 ? workout.CurrentRestTime-- : workout.CurrentActiveTime--;
+        //     var mode = workout.CurrentActiveTime > 0 ? "active" : "rest";
+        //     var timeLeft = workout.CurrentActiveTime <= 0 ? workout.CurrentRestTime-- : workout.CurrentActiveTime--;
 
-            await programmesOut.AddAsync(workout);
+        //     await programmesOut.AddAsync(workout);
 
-            log.LogInformation($"{timeLeft}");
-            await signalRMessages.AddAsync(
-                new SignalRMessage
-                {
-                    Target = "newMessage",
-                    Arguments = new[] { $"{timeLeft}", $"{mode}", $"{workout.SourceWorkoutId}" }
-                });
-        }
+        //     log.LogInformation($"{timeLeft}");
+        //     await signalRMessages.AddAsync(
+        //         new SignalRMessage
+        //         {
+        //             Target = "newMessage",
+        //             Arguments = new[] { $"{timeLeft}", $"{mode}", $"{workout.SourceWorkoutId}" }
+        //         });
+        // }
     }
 }

@@ -13,19 +13,22 @@ export interface Programme extends Dto {
   activeTime: number;
   restTime: number;
   mappings: ScreenMapping[];
+  message: string;
   sourceWorkoutId: string;
 }
 
 export interface ScreenMapping {
   screen: Screen;
   splitScreen: boolean;
-  exercise1: Exercise;
-  exercise2: Exercise;
+  exercise1: Exercise | null;
+  exercise2: Exercise | null;
 }
 
 export interface Exercise extends Dto {
   name: string;
+  title: string;
   videoUrl: string;
+  videoFileName: string;
 }
 
 export interface Dto {

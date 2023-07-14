@@ -10,6 +10,7 @@ import { Exercise, Programme } from "./types";
 import { Preferences } from "@capacitor/preferences";
 import { setSourceMapRange } from "typescript";
 import Modal from "@/components/modal";
+import Loader from "@/components/loader";
 
 export default function Home() {
   const [message, setMessage] = useState("this week 20% off protein shakes");
@@ -107,7 +108,7 @@ export default function Home() {
   const [showModal, setShowModal] = useState<boolean>(false);
 
   return !workout ? (
-    <>Loading...</>
+    <Loader />
   ) : (
     <main className="flex min-h-screen max-h-screen flex-col items-center align-middle justify-center bg-gradient-to-r from-gray-200">
       <input
@@ -161,6 +162,7 @@ export default function Home() {
       </div>
       {showModal && (
         <Modal
+          happy={true}
           title="Select Screen"
           onAccept={() => setShowModal(false)}
           onCancel={() => setShowModal(false)}

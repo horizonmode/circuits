@@ -14,6 +14,20 @@ namespace HorizonMode.GymScreens
 {
     public static class Exercises
     {
+        [FunctionName("GetExerciseById")]
+        public static IActionResult GetExerciseById([HttpTrigger(methods: "get", Route = "exercise/{id}")] HttpRequest req,
+        [CosmosDB(
+                databaseName: "screens",
+                collectionName: "exercises",
+                ConnectionStringSetting = "CosmosDBConnection",
+                Id = "{id}",
+                PartitionKey = "{id}")] Exercise exercise, ILogger log)
+        {
+            log.LogInformation($"GetExerciseById function processed");
+
+            return new OkObjectResult(exercise);
+        }
+
         [FunctionName("GetExercises")]
         public static IActionResult GetExercises([HttpTrigger(methods: "get", Route = "exercise")] HttpRequest req,
         [CosmosDB(

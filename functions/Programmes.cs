@@ -55,6 +55,7 @@ namespace HorizonMode.GymScreens
         {
             log.LogInformation($"GetProgrammeById function processed");
 
+            if (programme == null) return new NotFoundResult();
             return new OkObjectResult(programme);
         }
 
@@ -68,7 +69,7 @@ namespace HorizonMode.GymScreens
                 PartitionKey = "active")] ActiveProgramme programme, ILogger log)
         {
             log.LogInformation($"GetActiveProgramme function processed");
-
+            if (programme == null) return new NotFoundResult();
             return new OkObjectResult(programme);
         }
 

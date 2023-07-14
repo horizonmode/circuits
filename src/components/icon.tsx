@@ -1,5 +1,6 @@
 export type IconProps = {
   type: "edit" | "add" | "del";
+  onClick?: (() => void) | null;
 };
 
 const del = (
@@ -50,9 +51,16 @@ const add = (
   </svg>
 );
 
-function Icon({ type }: IconProps) {
+function Icon({ type, onClick }: IconProps) {
   return (
-    <div className="w-10 h-10 border-2 border-black rounded-full cursor-pointer p-2 hover:bg-black hover:text-white">
+    <div
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        onClick && onClick();
+      }}
+      className="w-10 h-10 border-2 border-black rounded-full cursor-pointer p-2 hover:bg-black hover:text-white"
+    >
       {type === "edit" ? edit : type === "del" ? del : add}
     </div>
   );
