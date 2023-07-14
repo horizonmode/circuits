@@ -14,14 +14,16 @@ export default function Admin() {
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchProgrammes = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/programme`);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/programme?code=${process.env.NEXT_PUBLIC_API_KEY}`
+    );
     const data = await res.json();
     setProgrammes(data);
   };
 
   const fetchActiveProgramme = async () => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/programme/getActive`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/programme/getActive?code=${process.env.NEXT_PUBLIC_API_KEY}`
     );
     if (!res.ok) return;
     const data = await res.json();
@@ -38,7 +40,7 @@ export default function Admin() {
   const setNewActive = (workoutId: string) => {
     const send = async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/programme/setActive/${workoutId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/programme/setActive/${workoutId}?code=${process.env.NEXT_PUBLIC_API_KEY}`
       );
       const data = await res.json();
       setActiveProgramme(workoutId);
@@ -48,9 +50,12 @@ export default function Admin() {
   };
 
   const deleteProgramme = async (id: string) => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/programme/${id}`, {
-      method: "DELETE",
-    });
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/programme/${id}?code=${process.env.NEXT_PUBLIC_API_KEY}`,
+      {
+        method: "DELETE",
+      }
+    );
     await fetchProgrammes();
     await fetchActiveProgramme();
   };
@@ -97,13 +102,10 @@ export default function Admin() {
             </div>
           ))}
           <div className="w-full relative lg:w-1/2 h-20 flex align-middle justify-center">
-            <Link
-              href={{
-                pathname: `/admin/programmes/create`,
-              }}
-            >
-              <Icon type="add" />
-            </Link>
+            <Icon
+              type="add"
+              onClick={() => router.push(`/admin/programmes/create`)}
+            />
           </div>
         </div>
       )}

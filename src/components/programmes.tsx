@@ -33,7 +33,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
   useEffect(() => {
     const fetchProgramme = async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/programme/${programmeId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/programme/${programmeId}?code=${process.env.NEXT_PUBLIC_API_KEY}`
       );
       const data = await res.json();
       setProgramme(data);
@@ -61,7 +61,8 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     async (values: Programme) => {
       const url =
         `${process.env.NEXT_PUBLIC_API_URL}/api/programme` +
-        (mode === "edit" ? `/${values.id}` : "");
+        (mode === "edit" ? `/${values.id}` : "") +
+        `?code=${process.env.NEXT_PUBLIC_API_KEY}`;
       const res = await fetch(url, {
         method: mode === "create" ? "POST" : "PUT",
         body: JSON.stringify(values),
@@ -174,7 +175,9 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
   };
 
   const fetchExercises = async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/exercise`);
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/exercise?code=${process.env.NEXT_PUBLIC_API_KEY}`
+    );
     const data = await res.json();
     setExercises(data);
   };
