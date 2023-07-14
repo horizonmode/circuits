@@ -34,15 +34,14 @@ export default function Home() {
 
   useEffect(() => {
     const connection = new HubConnectionBuilder()
-      .withUrl(
-        `${process.env.NEXT_PUBLIC_API_URL}/api?code=${process.env.NEXT_PUBLIC_API_KEY}`
-      )
+      .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/api`)
       .configureLogging(LogLevel.Information)
       .build();
     connection.on("newMessage", (message, mode, workoutId) => {
       setTime(parseInt(message, 10));
       setMode(mode);
       setProgrammeId(workoutId);
+      console.log(message, mode, workoutId);
     });
 
     connection.start();

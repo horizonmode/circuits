@@ -162,6 +162,19 @@ namespace HorizonMode.GymScreens
                 Id = "{id}",
                 PartitionKey ="{id}",
                 ConnectionStringSetting = "CosmosDBConnection")] out Programme programme,
+                 [CosmosDB(
+                databaseName: "screens",
+                collectionName: "programmes",
+                Id = "active",
+                PartitionKey ="active",
+                ConnectionStringSetting = "CosmosDBConnection")] ActiveProgramme currentActiveProgramme,
+                            [CosmosDB(
+                databaseName: "screens",
+                collectionName: "programmes",
+                Id = "active",
+                PartitionKey ="active",
+                ConnectionStringSetting = "CosmosDBConnection")] out ActiveProgramme nextActiveProgramme,
+                [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
                 ILogger logger, string id)
         {
             // getting book to add from request body
@@ -171,7 +184,70 @@ namespace HorizonMode.GymScreens
                 requestBody = streamReader.ReadToEnd();
             }
 
-            programme = JsonConvert.DeserializeObject<Programme>(requestBody);
+            Programme data = JsonConvert.DeserializeObject<Programme>(requestBody);
+            programme = data;
+            programme.Id = Guid.NewGuid().ToString();
+
+            nextActiveProgramme = currentActiveProgramme;
+
+            var option = new FeedOptions { EnableCrossPartitionQuery = true };
+            var exerciseCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
+            var screenCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "screens");
+
+            foreach (var screenMap in programme.Mappings)
+            {
+                if (screenMap.Screen == null || screenMap.Screen.Tag == null) return new BadRequestResult();
+
+                var screen = client.CreateDocumentQuery<Screen>(screenCollectionUri, option).Where(t => t.Tag == screenMap.Screen.Tag)
+                      .AsEnumerable().FirstOrDefault();
+
+                if (screen == null)
+                {
+                    return new BadRequestResult();
+                }
+
+                screenMap.Screen.Id = screen.Id;
+
+                var exercise1 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise1.Id)
+                      .AsEnumerable().FirstOrDefault();
+
+                if (exercise1 == null)
+                {
+                    return new BadRequestResult();
+                }
+
+                screenMap.Exercise1.Name = exercise1.Name;
+                screenMap.Exercise1.VideoUrl = exercise1.VideoUrl;
+
+                if (!screenMap.SplitScreen) continue;
+
+                var exercise2 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise2.Id)
+                                      .AsEnumerable().FirstOrDefault();
+
+                if (exercise2 == null)
+                {
+                    return new BadRequestResult();
+                }
+
+                screenMap.Exercise2.Name = exercise2.Name;
+                screenMap.Exercise2.VideoUrl = exercise2.VideoUrl;
+            }
+
+            if (programme.Id == currentActiveProgramme.SourceWorkoutId)
+            {
+                var ap = new ActiveProgramme();
+                ap.ActiveTime = programme.ActiveTime;
+                ap.CurrentActiveTime = programme.ActiveTime;
+                ap.CurrentRestTime = programme.RestTime;
+                ap.Name = programme.Name;
+                ap.Mappings = programme.Mappings;
+                ap.RestTime = programme.RestTime;
+                ap.Id = "active";
+                ap.SourceWorkoutId = programme.Id;
+
+                nextActiveProgramme = ap;
+            }
+
             return new OkObjectResult(programme);
         }
 
