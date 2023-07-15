@@ -7,8 +7,12 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        hurlant: ["hurlant", "ui-sans-serif", "system-ui"],
+      },
       colors: {
         powder: "#E38282",
+        bluemain: "#18BAFF",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

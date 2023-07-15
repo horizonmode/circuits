@@ -96,7 +96,8 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
     async (values: Exercise) => {
       const url =
         `${process.env.NEXT_PUBLIC_API_URL}/api/exercise` +
-        (mode === "edit" ? `/${values.id}` : "");
+        (mode === "edit" ? `/${values.id}` : "") +
+        `?code=${process.env.NEXT_PUBLIC_API_KEY}`;
       const res = await fetch(url, {
         method: mode === "create" ? "POST" : "PUT",
         body: JSON.stringify(values),

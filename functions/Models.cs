@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
@@ -51,5 +52,7 @@ namespace HorizonMode.GymScreens
     {
         [JsonProperty("id")]
         public string Id { get; set; }
+
+        public DateTime LastUpdated { get; set; } = DateTime.Now;
     }
 }

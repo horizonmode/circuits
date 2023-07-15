@@ -19,6 +19,7 @@ export default function Home() {
   const [programmeId, setProgrammeId] = useState<string>("");
   const [workout, setWorkout] = useState<Exercise | null>(null);
   const [screen, setScreen] = useState<string>("");
+  const [updated, setUpdated] = useState<Date | null>(null);
 
   useEffect(() => {
     const initKeepAwake = async () => {
@@ -37,11 +38,11 @@ export default function Home() {
       .withUrl(`${process.env.NEXT_PUBLIC_API_URL}/api`)
       .configureLogging(LogLevel.Information)
       .build();
-    connection.on("newMessage", (message, mode, workoutId) => {
+    connection.on("newMessage", (message, mode, workoutId, timeUpdated) => {
       setTime(parseInt(message, 10));
       setMode(mode);
       setProgrammeId(workoutId);
-      console.log(message, mode, workoutId);
+      setUpdated(timeUpdated);
     });
 
     connection.start();
@@ -49,16 +50,22 @@ export default function Home() {
     return () => {
       if (connection.state === HubConnectionState.Connected) connection.stop();
     };
-  }, [setProgrammeId, setMode, setTime]);
+  }, [setProgrammeId, setMode, setTime, setUpdated]);
 
   useEffect(() => {
     if (programme && programmeId) {
       if (programmeId !== programme.sourceWorkoutId) {
-        console.log(programmeId, programme.sourceWorkoutId);
         fetchProgramme();
       }
     }
   }, [programmeId, programme]);
+
+  useEffect(() => {
+    console.log(updated, programme?.lastUpdated);
+    if (updated !== programme?.lastUpdated) {
+      fetchProgramme();
+    }
+  }, [updated]);
 
   const SetScreenStore = async (screenTag: string) => {
     await Preferences.set({
@@ -77,7 +84,7 @@ export default function Home() {
       const workout = programme.mappings.find((m) => m.screen.tag === screen);
       if (workout) setWorkout(workout.exercise1);
     }
-  }, [screen]);
+  }, [screen, programme]);
 
   useEffect(() => {
     const setupScreen = async () => {
@@ -108,25 +115,25 @@ export default function Home() {
   return !workout ? (
     <Loader />
   ) : (
-    <main className="flex min-h-screen max-h-screen flex-col items-center align-middle justify-center bg-gradient-to-r from-gray-200">
+    <main className="flex min-h-screen min-w-screen w-screen max-h-screen h-screen flex-col items-center align-middle justify-center bg-gradient-to-r from-gray-200">
       <input
         className="fixed top-2 right-2 w-10 h-10 cursor-pointer z-20"
         onClick={() => setShowModal(true)}
         type="button"
       ></input>
-      <div className="fixed z-10 flex flex-col justify-center items-right top-0 w-screen">
+      <div className="fixed z-10 flex flex-row justify-end items-right top-0 w-screen">
         <h2
-          className={`pr-3 pt-3 text-6xl font-semibold text-center w-full text-slate-500`}
+          className={`pr-10 text-7xl italic text-black text-center font-hurlant`}
         >
-          {workout?.name}
+          {workout?.title}
         </h2>
       </div>
       <div
         data-tap-disable="true"
-        className="w-screen flex flex-row items-center justify-center"
+        className="w-4/5 h-4/5 flex flex-row items-center justify-center picborder bg-white"
       >
         <video
-          className="h-screen outline-none"
+          className="outline-none w-full h-full p-2"
           src={workout?.videoUrl}
           autoPlay
           playsInline
@@ -136,10 +143,12 @@ export default function Home() {
       </div>
 
       <div className="fixed flex flex-row bottom-0 w-screen ">
-        <div className="grow flex-col flex align-middle justify-center bg-gradient-to-r from-indigo-500">
+        <div className="grow flex-col flex align-middle justify-end">
           <div className="relative flex overflow-hidden w-full">
             <div className="animate-marquee whitespace-nowrap">
-              <span className="text-4xl mx-4">{message}</span>
+              <span className="text-5xl italic font-extrabold text-bluemain mx-4">
+                {message}
+              </span>
             </div>
           </div>
         </div>

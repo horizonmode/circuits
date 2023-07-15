@@ -15,6 +15,7 @@ export interface Programme extends Dto {
   mappings: ScreenMapping[];
   message: string;
   sourceWorkoutId: string;
+  lastUpdated: Date;
 }
 
 export interface ScreenMapping {

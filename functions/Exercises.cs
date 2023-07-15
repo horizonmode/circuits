@@ -73,6 +73,7 @@ namespace HorizonMode.GymScreens
                 Id = "{id}",
                 PartitionKey ="{id}",
                 ConnectionStringSetting = "CosmosDBConnection")] out Exercise exercise,
+                   [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
                 ILogger logger, string id)
         {
             var requestBody = string.Empty;
@@ -82,7 +83,34 @@ namespace HorizonMode.GymScreens
             }
 
             exercise = JsonConvert.DeserializeObject<Exercise>(requestBody);
-            return new OkObjectResult(exercise);
+
+            var option = new FeedOptions { EnableCrossPartitionQuery = true };
+            var programmeUri = UriFactory.CreateDocumentCollectionUri("screens", "programmes");
+
+            var programmes = client.CreateDocumentQuery<Programme>(programmeUri, option).Where(t => t.Mappings.Any(m => m.Exercise1.Id == id || m.Exercise2.Id == id))
+                               .AsEnumerable().ToList();
+
+            var ex = exercise;
+
+            programmes.ForEach(async p =>
+            {
+                p.Mappings.ForEach(m =>
+                {
+                    if (m.Exercise1.Id == id)
+                    {
+                        m.Exercise1 = ex;
+                    }
+                    if (m.Exercise2.Id == id)
+                    {
+                        m.Exercise2 = ex;
+                    }
+                });
+
+                p.LastUpdated = DateTime.Now;
+                await client.UpsertDocumentAsync(programmeUri, p);
+            });
+
+            return new CreatedResult($"/exercise/{id}", exercise);
         }
 
         [FunctionName("DeleteExercise")]
