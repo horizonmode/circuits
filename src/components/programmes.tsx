@@ -55,26 +55,23 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       setMessage(programme.message || "");
       setScreenMaps(programme.mappings);
     }
-  }, [programme]);
+  }, [programme, setActiveTime]);
 
-  const submitData = useCallback(
-    async (values: Programme) => {
-      const url =
-        `${process.env.NEXT_PUBLIC_API_URL}/api/programme` +
-        (mode === "edit" ? `/${values.id}` : "") +
-        `?code=${process.env.NEXT_PUBLIC_API_KEY}`;
-      const res = await fetch(url, {
-        method: mode === "create" ? "POST" : "PUT",
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) {
-        setSubmitStatus("failed");
-      } else {
-        setSubmitStatus("success");
-      }
-    },
-    [mode]
-  );
+  const submitData = async (values: Programme) => {
+    const url =
+      `${process.env.NEXT_PUBLIC_API_URL}/api/programme` +
+      (mode === "edit" ? `/${values.id}` : "") +
+      `?code=${process.env.NEXT_PUBLIC_API_KEY}`;
+    const res = await fetch(url, {
+      method: mode === "create" ? "POST" : "PUT",
+      body: JSON.stringify(values),
+    });
+    if (!res.ok) {
+      setSubmitStatus("failed");
+    } else {
+      setSubmitStatus("success");
+    }
+  };
 
   const onSubmitForm = async (e: FormEvent) => {
     e.preventDefault();
@@ -88,7 +85,10 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       id: programmeId || "",
       sourceWorkoutId: "",
       mappings: screenMaps,
+      lastUpdated: new Date(),
     };
+
+    console.log(values);
 
     await submitData(values);
   };

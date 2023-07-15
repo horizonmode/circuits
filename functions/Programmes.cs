@@ -186,7 +186,6 @@ namespace HorizonMode.GymScreens
 
             Programme data = JsonConvert.DeserializeObject<Programme>(requestBody);
             programme = data;
-            programme.Id = Guid.NewGuid().ToString();
 
             nextActiveProgramme = currentActiveProgramme;
 

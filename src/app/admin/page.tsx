@@ -38,6 +38,7 @@ export default function Admin() {
   }, []);
 
   const setNewActive = (workoutId: string) => {
+    if (!workoutId) return;
     const send = async () => {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/programme/setActive/${workoutId}?code=${process.env.NEXT_PUBLIC_API_KEY}`
@@ -70,37 +71,42 @@ export default function Admin() {
 
   const router = useRouter();
 
+  console.log(activeProgramme);
   return (
     <main className="flex flex-col items-left align-left ">
       {loading ? (
         <Loader />
       ) : (
         <div className="flex flex-col gap-5 ">
-          {programmes.map((p: Programme, i: number) => (
-            <div
-              key={`programme-${i}`}
-              className={`w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-10 rounded-md ${
-                activeProgramme === p.id
-                  ? " from-powder to-powder-300"
-                  : " from-gray-400 to-gray-50"
-              }`}
-              onClick={() => setNewActive(p.id)}
-            >
-              <span className="text-lg w-4/5">{p.name}</span>
+          {programmes
+            .filter((p) => p.id !== "active")
+            .map((p: Programme, i: number) => (
               <div
-                className={`absolute -left-20 bg-no-repeat bg-contain w-20 h-20 top-1/2 -translate-y-1/2 sm:none flex align-middle`}
+                key={`programme-${i}`}
+                className={`w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-10 rounded-md ${
+                  activeProgramme === p.id
+                    ? " from-powder to-powder-300"
+                    : " from-gray-400 to-gray-50"
+                }`}
+                onClick={() => setNewActive(p.id)}
               >
-                {activeProgramme === p.id && <Arrow />}
+                <span className="text-lg w-4/5">{p.name}</span>
+                <div
+                  className={`absolute -left-20 bg-no-repeat bg-contain w-20 h-20 top-1/2 -translate-y-1/2 sm:none flex align-middle`}
+                >
+                  {activeProgramme === p.id && <Arrow />}
+                </div>
+                <div className="flex flex-row justify-start gap-2">
+                  <Icon
+                    type="edit"
+                    onClick={() =>
+                      router.push(`/admin/programmes/edit/${p.id}`)
+                    }
+                  />
+                  <Icon type="del" onClick={() => selectForDelete(p.id)} />
+                </div>
               </div>
-              <div className="flex flex-row justify-start gap-2">
-                <Icon
-                  type="edit"
-                  onClick={() => router.push(`/admin/programmes/edit/${p.id}`)}
-                />
-                <Icon type="del" onClick={() => selectForDelete(p.id)} />
-              </div>
-            </div>
-          ))}
+            ))}
           <div className="w-full relative lg:w-1/2 h-20 flex align-middle justify-center">
             <Icon
               type="add"
