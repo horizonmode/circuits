@@ -22,14 +22,14 @@ namespace HorizonMode.GymScreens
         [SignalR(HubName = "serverless_dev")] IAsyncCollector<SignalRMessage> signalRMessages,
         [CosmosDB(
                 databaseName: "screens",
-                collectionName: "programmes",
+                containerName: "programmes",
                 Id = "active",
                 PartitionKey ="active",
-                ConnectionStringSetting = "CosmosDBConnection")] ActiveProgramme workout,
+                Connection = "CosmosDBConnection")] ActiveProgramme workout,
                 [CosmosDB(
                 databaseName: "screens",
-                collectionName: "programmes",
-                ConnectionStringSetting = "CosmosDBConnection")]
+                containerName: "programmes",
+                Connection = "CosmosDBConnection")]
                 IAsyncCollector<ActiveProgramme> programmesOut,
                 ILogger log)
         {

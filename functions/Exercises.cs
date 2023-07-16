@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -18,8 +18,8 @@ namespace HorizonMode.GymScreens
         public static IActionResult GetExerciseById([HttpTrigger(methods: "get", Route = "exercise/{id}")] HttpRequest req,
         [CosmosDB(
                 databaseName: "screens",
-                collectionName: "exercises",
-                ConnectionStringSetting = "CosmosDBConnection",
+                containerName: "exercises",
+                Connection = "CosmosDBConnection",
                 Id = "{id}",
                 PartitionKey = "{id}")] Exercise exercise, ILogger log)
         {
@@ -32,8 +32,8 @@ namespace HorizonMode.GymScreens
         public static IActionResult GetExercises([HttpTrigger(methods: "get", Route = "exercise")] HttpRequest req,
         [CosmosDB(
                 databaseName: "screens",
-                collectionName: "exercises",
-                ConnectionStringSetting = "CosmosDBConnection",
+                containerName: "exercises",
+                Connection = "CosmosDBConnection",
                 SqlQuery = "SELECT * FROM c order by c._ts desc")]
                 IEnumerable<Exercise> exercises, ILogger log)
         {
@@ -46,8 +46,8 @@ namespace HorizonMode.GymScreens
         public static IActionResult CreateExercise([HttpTrigger(methods: "post", Route = "exercise")] HttpRequest req,
          [CosmosDB(
                 databaseName: "screens",
-                collectionName: "exercises",
-                ConnectionStringSetting = "CosmosDBConnection")] out Exercise exercise)
+                containerName: "exercises",
+                Connection = "CosmosDBConnection")] out Exercise exercise)
         {
 
             string requestBody = String.Empty;
@@ -58,10 +58,10 @@ namespace HorizonMode.GymScreens
 
             Exercise data = JsonConvert.DeserializeObject<Exercise>(requestBody);
             exercise = data;
-            exercise.Id = Guid.NewGuid().ToString();
+            exercise.id = Guid.NewGuid().ToString();
 
             // Handle screen maps
-            return new CreatedResult($"/excercise/{data.Id}", data);
+            return new CreatedResult($"/exercise/{data.id}", data);
         }
 
         [FunctionName("UpdateExercise")]
@@ -69,11 +69,10 @@ namespace HorizonMode.GymScreens
          [HttpTrigger(methods: "put", Route = "exercise/{id}")] HttpRequest req,
           [CosmosDB(
                 databaseName: "screens",
-                collectionName: "exercises",
+                containerName: "exercises",
                 Id = "{id}",
                 PartitionKey ="{id}",
-                ConnectionStringSetting = "CosmosDBConnection")] out Exercise exercise,
-                   [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
+                Connection = "CosmosDBConnection")] out Exercise exercise,
                 ILogger logger, string id)
         {
             var requestBody = string.Empty;
@@ -84,52 +83,19 @@ namespace HorizonMode.GymScreens
 
             exercise = JsonConvert.DeserializeObject<Exercise>(requestBody);
 
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var programmeUri = UriFactory.CreateDocumentCollectionUri("screens", "programmes");
-
-            var programmes = client.CreateDocumentQuery<Programme>(programmeUri, option).Where(t => t.Mappings.Any(m => m.Exercise1.Id == id || m.Exercise2.Id == id))
-                               .AsEnumerable().ToList();
-
-            var ex = exercise;
-
-            programmes.ForEach(async p =>
-            {
-                p.Mappings.ForEach(m =>
-                {
-                    if (m.Exercise1.Id == id)
-                    {
-                        m.Exercise1 = ex;
-                    }
-                    if (m.Exercise2.Id == id)
-                    {
-                        m.Exercise2 = ex;
-                    }
-                });
-
-                p.LastUpdated = DateTime.Now;
-                await client.UpsertDocumentAsync(programmeUri, p);
-            });
-
             return new CreatedResult($"/exercise/{id}", exercise);
         }
 
         [FunctionName("DeleteExercise")]
-        public async static Task<IActionResult> DeleteBook(
+        public async static Task<IActionResult> DeleteExercise(
             [HttpTrigger(methods: "delete", Route = "exercise/{id}")] HttpRequest req,
-            [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
+            [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client,
             ILogger logger, string id)
         {
 
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var collectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
+            var container = client.GetContainer("screens", "exercises");
 
-            var document = client.CreateDocumentQuery(collectionUri, option).Where(t => t.Id == id)
-                  .AsEnumerable().FirstOrDefault();
-
-            await client.DeleteDocumentAsync(document.SelfLink, new RequestOptions
-            {
-                PartitionKey = new Microsoft.Azure.Documents.PartitionKey(id)
-            });
+            await container.DeleteItemAsync<Exercise>(id, new PartitionKey(id));
 
             return new OkResult();
         }

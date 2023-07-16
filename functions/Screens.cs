@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -19,8 +19,8 @@ namespace HorizonMode.GymScreens
         public static IActionResult GetScreens([HttpTrigger(methods: "get", Route = "screen")] HttpRequest req,
         [CosmosDB(
                 databaseName: "screens",
-                collectionName: "screens",
-                ConnectionStringSetting = "CosmosDBConnection",
+                containerName: "screens",
+                Connection = "CosmosDBConnection",
                 SqlQuery = "SELECT * FROM c order by c._ts desc")]
                 IEnumerable<Screen> Screens, ILogger log)
         {
@@ -33,8 +33,8 @@ namespace HorizonMode.GymScreens
         public static IActionResult CreateScreen([HttpTrigger(methods: "post", Route = "screen")] HttpRequest req,
          [CosmosDB(
                 databaseName: "screens",
-                collectionName: "screens",
-                ConnectionStringSetting = "CosmosDBConnection")] out Screen Screen)
+                containerName: "screens",
+                Connection = "CosmosDBConnection")] out Screen Screen)
         {
 
             string requestBody = String.Empty;
@@ -45,9 +45,9 @@ namespace HorizonMode.GymScreens
 
             Screen data = JsonConvert.DeserializeObject<Screen>(requestBody);
             Screen = data;
-            Screen.Id = Guid.NewGuid().ToString();
+            Screen.id = Guid.NewGuid().ToString();
 
-            return new CreatedResult($"/screen/{data.Id}", data);
+            return new CreatedResult($"/screen/{data.id}", data);
         }
 
         [FunctionName("UpdateScreen")]
@@ -55,10 +55,10 @@ namespace HorizonMode.GymScreens
          [HttpTrigger(methods: "put", Route = "screen/{id}")] HttpRequest req,
           [CosmosDB(
                 databaseName: "screens",
-                collectionName: "screens",
+                containerName: "screens",
                 Id = "{id}",
                 PartitionKey ="{id}",
-                ConnectionStringSetting = "CosmosDBConnection")] out Screen Screen,
+                Connection = "CosmosDBConnection")] out Screen Screen,
                 ILogger logger, string id)
         {
             var requestBody = string.Empty;
@@ -72,22 +72,15 @@ namespace HorizonMode.GymScreens
         }
 
         [FunctionName("DeleteScreen")]
-        public async static Task<IActionResult> DeleteBook(
+        public async static Task<IActionResult> DeleteScreen(
             [HttpTrigger(methods: "delete", Route = "screen/{id}")] HttpRequest req,
-            [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
+            [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client,
             ILogger logger, string id)
         {
 
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var collectionUri = UriFactory.CreateDocumentCollectionUri("screens", "Screens");
+            var container = client.GetContainer("screens", "screens");
 
-            var document = client.CreateDocumentQuery(collectionUri, option).Where(t => t.Id == id)
-                  .AsEnumerable().FirstOrDefault();
-
-            await client.DeleteDocumentAsync(document.SelfLink, new RequestOptions
-            {
-                PartitionKey = new Microsoft.Azure.Documents.PartitionKey(id)
-            });
+            await container.DeleteItemAsync<Screen>(id, new PartitionKey(id));
 
             return new OkResult();
         }

@@ -88,7 +88,11 @@ export default function Admin() {
                     ? " from-powder to-powder-300"
                     : " from-gray-400 to-gray-50"
                 }`}
-                onClick={() => setNewActive(p.id)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setNewActive(p.id);
+                }}
               >
                 <span className="text-lg w-4/5">{p.name}</span>
                 <div

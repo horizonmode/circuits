@@ -51,7 +51,7 @@ namespace HorizonMode.GymScreens
     public class Dto
     {
         [JsonProperty("id")]
-        public string Id { get; set; }
+        public string id { get; set; }
 
         public DateTime LastUpdated { get; set; } = DateTime.Now;
     }

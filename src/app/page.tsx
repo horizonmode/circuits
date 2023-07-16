@@ -115,80 +115,119 @@ export default function Home() {
   return !workout ? (
     <Loader />
   ) : (
-    <main className="flex min-h-screen min-w-screen w-screen max-h-screen h-screen flex-col items-center align-middle justify-center bg-gradient-to-r from-gray-200">
+    <main className="h-screen w-screen flex flex-col overflow-hidden bg-gradient-to-r from-gray-200">
       <input
-        className="fixed top-2 right-2 w-10 h-10 cursor-pointer z-20"
+        className="fixed top-2 left-2 w-10 h-10 cursor-pointer z-20"
         onClick={() => setShowModal(true)}
         type="button"
       ></input>
-      <div className="fixed z-10 flex flex-row justify-end items-right top-0 w-screen">
-        <h2
-          className={`pr-10 text-7xl italic text-black text-center font-hurlant`}
+      <div className="grow-0 shrink-0 h-[5vh] ">
+        <div className="flex flex-row justify-end items-right w-screen">
+          <h2
+            className={`text-7xl px-4 leading-1 italic font-hurlant text-black text-center `}
+          >
+            {workout?.title}
+          </h2>
+        </div>
+      </div>
+      <div className="grow p-12">
+        <div
+          data-tap-disable="true"
+          className="relative w-full h-full picborder bg-white"
         >
-          {workout?.title}
-        </h2>
+          <video
+            className="outline-none p-2 absolute top-1.2 left-1/2 h-full -translate-x-1/2"
+            src={workout?.videoUrl}
+            autoPlay
+            playsInline
+            muted
+            loop
+          />
+        </div>
       </div>
-      <div
-        data-tap-disable="true"
-        className="w-4/5 h-4/5 flex flex-row items-center justify-center picborder bg-white"
-      >
-        <video
-          className="outline-none w-full h-full p-2"
-          src={workout?.videoUrl}
-          autoPlay
-          playsInline
-          muted
-          loop
-        />
-      </div>
-
-      <div className="fixed flex flex-row bottom-0 w-screen ">
-        <div className="grow flex-col flex align-middle justify-end">
-          <div className="relative flex overflow-hidden w-full">
-            <div className="animate-marquee whitespace-nowrap">
-              <span className="text-5xl italic font-extrabold text-bluemain mx-4">
-                {message}
-              </span>
+      <div className="grow-0 h-[10vh] shrink-0 ">
+        <div className="flex flex-row w-full h-full">
+          <article className="flex whitespace-no-wrap overflow-x-hidden overflow-y-hidden grow">
+            <div className="relative">
+              <ul className="flex animate-marquee whitespace-nowrap">
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+              </ul>
+              <ul className="flex absolute top-0 animate-marquee2">
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+                <li className=" font-extrabold italic  text-bluemain text-6xl mr-10">
+                  {programme?.message}
+                </li>
+              </ul>
+            </div>
+          </article>
+          <div className="relative w-40 shrink-0 grow-0">
+            {mode === "rest" && (
+              <aside className="absolute -top-20 left-1/2 -translate-x-1/2 text-blue-700 text-sm text-left">
+                rest
+              </aside>
+            )}
+            <div
+              className={`text-9xl font-semibold text-center absolute bottom-0 w-full ${
+                mode === "active" ? "text-green-700" : "text-blue-700"
+              }`}
+            >
+              {time}
             </div>
           </div>
         </div>
-        <div className="relative w-40 flex-none">
-          {mode === "rest" && (
-            <aside className="absolute -top-4 left-1/2 -translate-x-1/2 text-blue-700 text-sm text-left">
-              rest
-            </aside>
-          )}
-          <div
-            className={`text-9xl font-semibold text-center ${
-              mode === "active" ? "text-green-700" : "text-blue-700"
-            }`}
+        {showModal && (
+          <Modal
+            happy={true}
+            title="Select Screen"
+            onAccept={() => setShowModal(false)}
+            onCancel={() => setShowModal(false)}
           >
-            {time}
-          </div>
-        </div>
+            <select
+              name="screen"
+              onChange={(e) => {
+                setScreen(e.target.value);
+              }}
+            >
+              <option>screen1</option>
+              <option>screen2</option>
+              <option>screen3</option>
+              <option>screen4</option>
+              <option>screen5</option>
+            </select>
+          </Modal>
+        )}
       </div>
-      {showModal && (
-        <Modal
-          happy={true}
-          title="Select Screen"
-          onAccept={() => setShowModal(false)}
-          onCancel={() => setShowModal(false)}
-        >
-          <select
-            name="screen"
-            onChange={(e) => {
-              console.log(e.target.value);
-              setScreen(e.target.value);
-            }}
-          >
-            <option>screen1</option>
-            <option>screen2</option>
-            <option>screen3</option>
-            <option>screen4</option>
-            <option>screen5</option>
-          </select>
-        </Modal>
-      )}
     </main>
   );
 }

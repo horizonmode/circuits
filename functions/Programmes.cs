@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Documents.Client;
+using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -14,21 +14,9 @@ namespace HorizonMode.GymScreens
 {
     public static class Programmes
     {
-        [FunctionName("SetActiveProgramme")]
-        public static IActionResult SetActiveWorkout([HttpTrigger(methods: "get", Route = "programme/setActive/{id}")] HttpRequest req,
-         [CosmosDB(
-                databaseName: "screens",
-                collectionName: "programmes",
-                Id = "{id}",
-                PartitionKey ="{id}",
-                ConnectionStringSetting = "CosmosDBConnection")] Programme programme,
-          [CosmosDB(
-                databaseName: "screens",
-                collectionName: "programmes",
-                ConnectionStringSetting = "CosmosDBConnection")] out ActiveProgramme activeProgramme, ILogger log)
-        {
-            log.LogInformation($"SetActiveWorkout function processed");
 
+        public static ActiveProgramme ConvertToActiveProgramme(Programme programme)
+        {
             var ap = new ActiveProgramme();
             ap.ActiveTime = programme.ActiveTime;
             ap.CurrentActiveTime = programme.ActiveTime;
@@ -36,10 +24,119 @@ namespace HorizonMode.GymScreens
             ap.Name = programme.Name;
             ap.Mappings = programme.Mappings;
             ap.RestTime = programme.RestTime;
-            ap.Id = "active";
-            ap.SourceWorkoutId = programme.Id;
+            ap.id = "active";
+            ap.SourceWorkoutId = programme.id;
+            ap.Message = programme.Message;
 
-            activeProgramme = ap;
+            return ap;
+        }
+
+        public static void UpdateProgrammeWithExercise(Programme p, Exercise ex)
+        {
+            p.Mappings.ForEach(m =>
+                                   {
+                                       if (m.Exercise1.id == ex.id)
+                                       {
+                                           m.Exercise1 = ex;
+                                       }
+                                       if (m.Exercise2.id == ex.id)
+                                       {
+                                           m.Exercise2 = ex;
+                                       }
+                                   });
+
+            p.LastUpdated = DateTime.Now;
+        }
+
+        [FunctionName("CosmosTrigger_Exercises")]
+        public static async Task CosmosTrigger_Exercises([CosmosDBTrigger(
+            databaseName: "screens",
+            containerName: "exercises",
+            Connection = "CosmosDBConnection",
+            LeaseConnection = "CosmosDBConnection",
+            CreateLeaseContainerIfNotExists = true)]IReadOnlyList<Exercise> exercises,
+            [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client, ILogger log)
+        {
+            if (exercises != null && exercises.Count > 0)
+            {
+                log.LogInformation("exercises modified " + exercises.Count);
+                log.LogInformation("First exercises Id " + exercises[0].id);
+
+                var container = client.GetContainer("screens", "programmes");
+
+                foreach (var updatedExercise in exercises)
+                {
+                    var programmes = container.GetItemLinqQueryable<Programme>(true).Where(p => p.id != "active" && p.Mappings.Any(m => m.Exercise1.id == updatedExercise.id
+                    || m.Exercise2.id == updatedExercise.id)).AsEnumerable().ToList();
+
+                    var activeProgramme = container.GetItemLinqQueryable<ActiveProgramme>(true).Where(p => p.id == "active" && p.Mappings.Any(m => m.Exercise1.id == updatedExercise.id
+                    || m.Exercise2.id == updatedExercise.id)).AsEnumerable().FirstOrDefault();
+
+                    foreach (var programme in programmes)
+                    {
+                        UpdateProgrammeWithExercise(programme, updatedExercise);
+                    }
+
+                    if (activeProgramme != null)
+                    {
+                        UpdateProgrammeWithExercise(activeProgramme, updatedExercise);
+                        await container.UpsertItemAsync<ActiveProgramme>(activeProgramme);
+                    }
+                }
+            }
+        }
+
+        [FunctionName("CosmosTrigger_Programmes")]
+        public static async Task CosmosTrigger_Programmes([CosmosDBTrigger(
+            databaseName: "screens",
+            containerName: "programmes",
+            Connection = "CosmosDBConnection",
+            LeaseConnection = "CosmosDBConnection",
+            CreateLeaseContainerIfNotExists = true)]IReadOnlyList<Programme> programmes,
+            [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client, ILogger log)
+        {
+            if (programmes != null && programmes.Count > 0)
+            {
+                if (!programmes.Any(p => p.id != "active")) return;
+                log.LogInformation("programmes modified " + programmes.Count);
+                log.LogInformation("First programme Id " + programmes[0].id);
+
+                var container = client.GetContainer("screens", "programmes");
+
+                var activeProgramme = container.GetItemLinqQueryable<ActiveProgramme>(
+                        true
+                     )
+                     .Where(a => a.id == "active").AsEnumerable().FirstOrDefault();
+
+                if (activeProgramme == null) return;
+
+                foreach (var updatedProgramme in programmes.Where(p => p.id != "active"))
+                {
+                    if (activeProgramme.SourceWorkoutId == updatedProgramme.id && activeProgramme.LastUpdated < updatedProgramme.LastUpdated)
+                    {
+                        activeProgramme = ConvertToActiveProgramme(updatedProgramme);
+                        await container.UpsertItemAsync<ActiveProgramme>(activeProgramme);
+                    }
+                }
+            }
+        }
+
+        [FunctionName("SetActiveProgramme")]
+        public static IActionResult SetActiveWorkout([HttpTrigger(methods: "get", Route = "programme/setActive/{id}")] HttpRequest req,
+         [CosmosDB(
+                databaseName: "screens",
+                containerName: "programmes",
+                Id = "{id}",
+                PartitionKey ="{id}",
+                Connection = "CosmosDBConnection")] Programme programme,
+          [CosmosDB(
+                databaseName: "screens",
+                containerName: "programmes",
+                Connection = "CosmosDBConnection")] out ActiveProgramme activeProgramme, ILogger log)
+        {
+            log.LogInformation($"SetActiveWorkout function processed");
+
+            activeProgramme = ConvertToActiveProgramme(programme);
 
             return new OkObjectResult(activeProgramme);
         }
@@ -48,8 +145,8 @@ namespace HorizonMode.GymScreens
         public static IActionResult GetProgrammeById([HttpTrigger(methods: "get", Route = "programme/{id}")] HttpRequest req,
          [CosmosDB(
                 databaseName: "screens",
-                collectionName: "programmes",
-                ConnectionStringSetting = "CosmosDBConnection",
+                containerName: "programmes",
+                Connection = "CosmosDBConnection",
                 Id = "{id}",
                 PartitionKey = "{id}")] Programme programme, ILogger log)
         {
@@ -61,10 +158,10 @@ namespace HorizonMode.GymScreens
 
         [FunctionName("GetActiveProgramme")]
         public static IActionResult GetActiveProgramme([HttpTrigger(methods: "get", Route = "programme/getActive")] HttpRequest req,
-      [CosmosDB(
+        [CosmosDB(
                 databaseName: "screens",
-                collectionName: "programmes",
-                ConnectionStringSetting = "CosmosDBConnection",
+                containerName: "programmes",
+                Connection = "CosmosDBConnection",
                 Id = "active",
                 PartitionKey = "active")] ActiveProgramme programme, ILogger log)
         {
@@ -77,8 +174,8 @@ namespace HorizonMode.GymScreens
         public static IActionResult GetProgrammes([HttpTrigger(methods: "get", Route = "programme")] HttpRequest req,
         [CosmosDB(
                 databaseName: "screens",
-                collectionName: "programmes",
-                ConnectionStringSetting = "CosmosDBConnection",
+                containerName: "programmes",
+                Connection = "CosmosDBConnection",
                 SqlQuery = "SELECT * FROM c order by c._ts desc")]
                 IEnumerable<Programme> programmes, ILogger log)
         {
@@ -91,9 +188,9 @@ namespace HorizonMode.GymScreens
         public static IActionResult CreateProgramme([HttpTrigger(methods: "post", Route = "programme")] HttpRequest req,
          [CosmosDB(
                 databaseName: "screens",
-                collectionName: "programmes",
-                ConnectionStringSetting = "CosmosDBConnection")] out Programme programme,
-                [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client)
+                containerName: "programmes",
+                Connection = "CosmosDBConnection")] out Programme programme,
+                [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client)
         {
 
             string requestBody = String.Empty;
@@ -104,28 +201,25 @@ namespace HorizonMode.GymScreens
 
             Programme data = JsonConvert.DeserializeObject<Programme>(requestBody);
             programme = data;
-            programme.Id = Guid.NewGuid().ToString();
+            programme.id = Guid.NewGuid().ToString();
 
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var exerciseCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
-            var screenCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "screens");
+            var screenContainer = client.GetContainer("screens", "screens");
+            var exerciseContainer = client.GetContainer("screens", "exercises");
 
             foreach (var screenMap in programme.Mappings)
             {
                 if (screenMap.Screen == null || screenMap.Screen.Tag == null) return new BadRequestResult();
 
-                var screen = client.CreateDocumentQuery<Screen>(screenCollectionUri, option).Where(t => t.Tag == screenMap.Screen.Tag)
-                      .AsEnumerable().FirstOrDefault();
+                var screen = screenContainer.GetItemLinqQueryable<Screen>(true).Where(t => t.Tag == screenMap.Screen.Tag).AsEnumerable().FirstOrDefault();
 
                 if (screen == null)
                 {
                     return new BadRequestResult();
                 }
 
-                screenMap.Screen.Id = screen.Id;
+                screenMap.Screen.id = screen.id;
 
-                var exercise1 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise1.Id)
-                      .AsEnumerable().FirstOrDefault();
+                var exercise1 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise1.id).AsEnumerable().FirstOrDefault();
 
                 if (exercise1 == null)
                 {
@@ -137,8 +231,7 @@ namespace HorizonMode.GymScreens
 
                 if (!screenMap.SplitScreen) continue;
 
-                var exercise2 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise2.Id)
-                                      .AsEnumerable().FirstOrDefault();
+                var exercise2 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise2.id).AsEnumerable().FirstOrDefault();
 
                 if (exercise2 == null)
                 {
@@ -150,7 +243,7 @@ namespace HorizonMode.GymScreens
             }
 
             // Handle screen maps
-            return new CreatedResult($"/programme/{data.Id}", data);
+            return new CreatedResult($"/programme/{data.id}", data);
         }
 
         [FunctionName("UpdateProgramme")]
@@ -158,24 +251,12 @@ namespace HorizonMode.GymScreens
          [HttpTrigger(methods: "put", Route = "programme/{id}")] HttpRequest req,
           [CosmosDB(
                 databaseName: "screens",
-                collectionName: "programmes",
+                containerName: "programmes",
                 Id = "{id}",
                 PartitionKey ="{id}",
-                ConnectionStringSetting = "CosmosDBConnection")] out Programme programme,
-                 [CosmosDB(
-                databaseName: "screens",
-                collectionName: "programmes",
-                Id = "active",
-                PartitionKey ="active",
-                ConnectionStringSetting = "CosmosDBConnection")] ActiveProgramme currentActiveProgramme,
-                            [CosmosDB(
-                databaseName: "screens",
-                collectionName: "programmes",
-                Id = "active",
-                PartitionKey ="active",
-                ConnectionStringSetting = "CosmosDBConnection")] out ActiveProgramme nextActiveProgramme,
-                [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
-                ILogger logger, string id)
+                Connection = "CosmosDBConnection")] out Programme programme,
+                [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client,
+                ILogger logger)
         {
             // getting book to add from request body
             var requestBody = string.Empty;
@@ -186,29 +267,25 @@ namespace HorizonMode.GymScreens
 
             Programme data = JsonConvert.DeserializeObject<Programme>(requestBody);
             programme = data;
+            programme.LastUpdated = DateTime.Now;
 
-            nextActiveProgramme = currentActiveProgramme;
-
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var exerciseCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "exercises");
-            var screenCollectionUri = UriFactory.CreateDocumentCollectionUri("screens", "screens");
+            var screenContainer = client.GetContainer("screens", "screens");
+            var exerciseContainer = client.GetContainer("screens", "exercises");
 
             foreach (var screenMap in programme.Mappings)
             {
                 if (screenMap.Screen == null || screenMap.Screen.Tag == null) return new BadRequestResult();
 
-                var screen = client.CreateDocumentQuery<Screen>(screenCollectionUri, option).Where(t => t.Tag == screenMap.Screen.Tag)
-                      .AsEnumerable().FirstOrDefault();
+                var screen = screenContainer.GetItemLinqQueryable<Screen>(true).Where(t => t.Tag == screenMap.Screen.Tag).AsEnumerable().FirstOrDefault();
 
                 if (screen == null)
                 {
                     return new BadRequestResult();
                 }
 
-                screenMap.Screen.Id = screen.Id;
+                screenMap.Screen.id = screen.id;
 
-                var exercise1 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise1.Id)
-                      .AsEnumerable().FirstOrDefault();
+                var exercise1 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise1.id).AsEnumerable().FirstOrDefault();
 
                 if (exercise1 == null)
                 {
@@ -220,8 +297,7 @@ namespace HorizonMode.GymScreens
 
                 if (!screenMap.SplitScreen) continue;
 
-                var exercise2 = client.CreateDocumentQuery<Exercise>(exerciseCollectionUri, option).Where(t => t.Id == screenMap.Exercise2.Id)
-                                      .AsEnumerable().FirstOrDefault();
+                var exercise2 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise2.id).AsEnumerable().FirstOrDefault();
 
                 if (exercise2 == null)
                 {
@@ -232,41 +308,19 @@ namespace HorizonMode.GymScreens
                 screenMap.Exercise2.VideoUrl = exercise2.VideoUrl;
             }
 
-            if (programme.Id == currentActiveProgramme.SourceWorkoutId)
-            {
-                var ap = new ActiveProgramme();
-                ap.ActiveTime = programme.ActiveTime;
-                ap.CurrentActiveTime = programme.ActiveTime;
-                ap.CurrentRestTime = programme.RestTime;
-                ap.Name = programme.Name;
-                ap.Mappings = programme.Mappings;
-                ap.RestTime = programme.RestTime;
-                ap.Id = "active";
-                ap.SourceWorkoutId = programme.Id;
-
-                nextActiveProgramme = ap;
-            }
-
             return new OkObjectResult(programme);
         }
 
         [FunctionName("DeleteProgramme")]
         public async static Task<IActionResult> DeleteProgramme(
              [HttpTrigger(methods: "delete", Route = "programme/{id}")] HttpRequest req,
-             [CosmosDB(ConnectionStringSetting = "CosmosDBConnection")] DocumentClient client,
+             [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client,
              ILogger logger, string id)
         {
 
-            var option = new FeedOptions { EnableCrossPartitionQuery = true };
-            var collectionUri = UriFactory.CreateDocumentCollectionUri("screens", "programmes");
+            var container = client.GetContainer("screens", "programmes");
 
-            var document = client.CreateDocumentQuery(collectionUri, option).Where(t => t.Id == id)
-                  .AsEnumerable().FirstOrDefault();
-
-            await client.DeleteDocumentAsync(document.SelfLink, new RequestOptions
-            {
-                PartitionKey = new Microsoft.Azure.Documents.PartitionKey(id)
-            });
+            await container.DeleteItemAsync<Programme>(id, new PartitionKey(id));
 
             return new OkResult();
         }
