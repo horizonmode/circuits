@@ -6,7 +6,7 @@ import {
   LogLevel,
   HubConnectionState,
 } from "@microsoft/signalr";
-import { Exercise, Programme } from "./types";
+import { Exercise, Programme, ScreenMapping } from "./types";
 import { Preferences } from "@capacitor/preferences";
 import Modal from "@/components/modal";
 import Loader from "@/components/loader";
@@ -17,7 +17,7 @@ export default function Home() {
   const [mode, setMode] = useState("active");
   const [programme, setProgramme] = useState<Programme | null>(null);
   const [programmeId, setProgrammeId] = useState<string>("");
-  const [workout, setWorkout] = useState<Exercise | null>(null);
+  const [workout, setWorkout] = useState<ScreenMapping | null>(null);
   const [screen, setScreen] = useState<string>("");
   const [updated, setUpdated] = useState<Date | null>(null);
 
@@ -82,7 +82,9 @@ export default function Home() {
   useEffect(() => {
     if (programme) {
       const workout = programme.mappings.find((m) => m.screen.tag === screen);
-      if (workout) setWorkout(workout.exercise1);
+      if (workout) {
+        setWorkout(workout);
+      }
     }
   }, [screen, programme]);
 
@@ -122,29 +124,75 @@ export default function Home() {
         type="button"
       ></input>
       <div className="grow-0 shrink-0 h-[5vh] ">
-        <div className="flex flex-row justify-end items-right w-screen">
-          <h2
-            className={`text-7xl px-4 leading-1 italic font-hurlant text-black text-center `}
+        {!workout.splitScreen ? (
+          <div className="flex flex-row justify-end items-right w-screen">
+            <h2
+              className={`text-7xl px-4 leading-1 italic font-hurlant text-black text-center `}
+            >
+              {workout?.exercise1?.title}
+            </h2>
+          </div>
+        ) : (
+          <div className="flex flex-row justify-evenly w-screen">
+            <h2
+              className={`text-7xl px-4 leading-1 italic font-hurlant text-black text-center `}
+            >
+              {workout?.exercise1?.title}
+            </h2>
+            <h2
+              className={`text-7xl px-4 leading-1 italic font-hurlant text-black text-center `}
+            >
+              {workout?.exercise2?.title}
+            </h2>
+          </div>
+        )}
+      </div>
+      {!workout?.splitScreen ? (
+        <div className="grow p-12">
+          <div
+            data-tap-disable="true"
+            className="relative w-full h-full picborder bg-white"
           >
-            {workout?.title}
-          </h2>
+            <video
+              className="outline-none p-2 absolute top-1.2 left-1/2 h-full -translate-x-1/2"
+              src={workout?.exercise1?.videoUrl}
+              autoPlay
+              playsInline
+              muted
+              loop
+            />
+          </div>
         </div>
-      </div>
-      <div className="grow p-12">
-        <div
-          data-tap-disable="true"
-          className="relative w-full h-full picborder bg-white"
-        >
-          <video
-            className="outline-none p-2 absolute top-1.2 left-1/2 h-full -translate-x-1/2"
-            src={workout?.videoUrl}
-            autoPlay
-            playsInline
-            muted
-            loop
-          />
+      ) : (
+        <div className="grow p-12 flex flex-row">
+          <div
+            data-tap-disable="true"
+            className="relative w-1/2 h-full picborder bg-white"
+          >
+            <video
+              className="outline-none p-2 absolute top-1.2 left-1/2 h-full -translate-x-1/2"
+              src={workout?.exercise1?.videoUrl}
+              autoPlay
+              playsInline
+              muted
+              loop
+            />
+          </div>
+          <div
+            data-tap-disable="true"
+            className="relative w-1/2 h-full picborder bg-white"
+          >
+            <video
+              className="outline-none p-2 absolute top-1.2 left-1/2 h-full -translate-x-1/2"
+              src={workout.exercise2?.videoUrl}
+              autoPlay
+              playsInline
+              muted
+              loop
+            />
+          </div>
         </div>
-      </div>
+      )}
       <div className="grow-0 h-[10vh] shrink-0 ">
         <div className="flex flex-row w-full h-full">
           <article className="flex whitespace-no-wrap overflow-x-hidden overflow-y-hidden grow">
