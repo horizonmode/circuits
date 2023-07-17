@@ -7,7 +7,7 @@ export interface ScreenMapProps {
   exerciseOptions: DropDownOption[];
   onChange: (name: string, e: string | boolean) => void;
 }
-export default function ({
+export default function ScreenMap({
   screenMap,
   exerciseOptions,
   onChange,

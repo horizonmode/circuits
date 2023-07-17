@@ -65,7 +65,7 @@ export default function Home() {
     if (updated !== programme?.lastUpdated) {
       fetchProgramme();
     }
-  }, [updated]);
+  }, [updated, programme?.lastUpdated]);
 
   const SetScreenStore = async (screenTag: string) => {
     await Preferences.set({
