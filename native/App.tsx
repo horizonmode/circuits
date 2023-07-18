@@ -15,6 +15,8 @@ import {
   Text,
   useColorScheme,
   View,
+  Image,
+  ImageBackground,
 } from 'react-native';
 
 import {
@@ -30,7 +32,7 @@ import Video from 'react-native-video';
 import MarqueeText from 'react-native-marquee';
 
 import 'react-native-svg';
-
+import LinearGradient from 'react-native-linear-gradient';
 import {
   HubConnectionBuilder,
   LogLevel,
@@ -38,6 +40,8 @@ import {
 } from '@microsoft/signalr';
 
 import Circle from './Circle';
+import {Programme, ScreenMapping} from './types';
+import KeepAwake from 'react-native-keep-awake';
 
 type SectionProps = PropsWithChildren<{
   title: string;
@@ -85,6 +89,70 @@ function App(): JSX.Element {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
+  const [time, setTime] = useState(0);
+  const [mode, setMode] = useState('active');
+  const [programme, setProgramme] = useState<Programme | null>(null);
+  const [programmeId, setProgrammeId] = useState<string>('');
+  const [workout, setWorkout] = useState<ScreenMapping | null>(null);
+  const [screen, setScreen] = useState<string>('');
+  const [updated, setUpdated] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (programme && programmeId) {
+      if (programmeId !== programme.sourceWorkoutId) {
+        fetchProgramme();
+      }
+    }
+  }, [programmeId, programme]);
+
+  useEffect(() => {
+    console.log(updated, programme?.lastUpdated);
+    if (updated !== programme?.lastUpdated) {
+      fetchProgramme();
+    }
+  }, [updated, programme?.lastUpdated]);
+
+  //   const SetScreenStore = async (screenTag: string) => {
+  //     await Preferences.set({
+  //       key: "screen",
+  //       value: screenTag,
+  //     });
+  //   };
+
+  //   const GetScreen = async () => {
+  //     const ret = await Preferences.get({ key: "screen" });
+  //     return ret.value;
+  //   };
+
+  useEffect(() => {
+    if (programme) {
+      const workout = programme.mappings.find(m => m.screen.tag === screen);
+      if (workout) {
+        setWorkout(workout);
+      }
+    }
+  }, [screen, programme]);
+
+  useEffect(() => {
+    const setupScreen = async () => {
+      setScreen('screen1');
+    };
+    if (programme) setupScreen();
+  }, [programme]);
+
+  const fetchProgramme = async () => {
+    console.log(process.env.REACT_APP_API_URL);
+    const res = await fetch(
+      `https://signalromm.azurewebsites.net/api/programme/getActive?code=1yI4xG8VMfZB1wp0n3ukdc_QMX0eKUskLEr-iRyVMKr7AzFuX2CbCw==&clientId=default`,
+    );
+    const progJson = (await res.json()) as Programme;
+    setProgramme(progJson);
+  };
+
+  useEffect(() => {
+    fetchProgramme();
+  }, []);
+
   const styles = {
     videoView: {
       justifyContent: 'center',
@@ -110,6 +178,10 @@ function App(): JSX.Element {
       .build();
     connection.on('newMessage', (message, mode, workoutId, timeUpdated) => {
       setMessage(message);
+      setTime(parseInt(message, 10));
+      setMode(mode);
+      setProgrammeId(workoutId);
+      setUpdated(timeUpdated);
     });
 
     connection.start();
@@ -119,14 +191,49 @@ function App(): JSX.Element {
     };
   }, [setMessage]);
 
-  return (
-    <SafeAreaView style={{width: '100%', height: '100%', display: 'flex'}}>
+  return !workout ? (
+    <Text>Loading...</Text>
+  ) : (
+    <SafeAreaView
+      style={{
+        flex: 1,
+        display: 'flex',
+        backgroundColor: Colors.white,
+      }}>
+      <KeepAwake />
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
+        backgroundColor={Colors.white}
       />
-      <View style={{display: 'flex', width: '100%', alignItems: 'center'}}>
-        <Text style={{fontSize: 50, color: 'black'}}>Dumbell Lifts</Text>
+      <View
+        style={{
+          position: 'absolute',
+          marginLeft: 5,
+          marginTop: 5,
+          zIndex: 3,
+          width: '10%',
+          aspectRatio: 1,
+        }}>
+        <ImageBackground
+          resizeMode="cover"
+          style={{flex: 1}}
+          source={require('./assets/images/logo-circle.jpg')}></ImageBackground>
+      </View>
+      <View
+        style={{
+          display: 'flex',
+          width: '100%',
+          alignItems: 'center',
+          backgroundColor: Colors.white,
+        }}>
+        <Text
+          style={{
+            fontSize: 50,
+            fontFamily: 'LeagueSpartan-Bold',
+            color: 'grey',
+          }}>
+          {workout.exercise1?.title.toUpperCase()}
+        </Text>
       </View>
       <View
         style={{
@@ -137,13 +244,14 @@ function App(): JSX.Element {
         }}>
         <Video
           source={{
-            uri: videoSrc,
+            uri: workout?.exercise1?.videoUrl,
           }}
-          paused={false} // make it start
+          paused={!workout?.exercise1?.videoUrl} // make it start
           repeat={true} //
           resizeMode="contain"
           style={{
             position: 'absolute',
+            zIndex: 1,
             top: 0,
             left: 0,
             bottom: 0,
@@ -154,23 +262,54 @@ function App(): JSX.Element {
       <View
         style={{
           position: 'absolute',
-          right: 5,
-          bottom: 5,
+          right: 0,
+          bottom: 0,
+          zIndex: 8,
           display: 'flex',
           alignItems: 'center',
         }}>
-        <MarqueeText
-          style={{fontSize: 24}}
-          speed={1}
-          marqueeOnStart={true}
-          loop={true}
-          delay={1000}>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry and typesetting industry.
-        </MarqueeText>
-        <Text style={{fontSize: 50, color: 'black'}}>{message}</Text>
-        <Circle text={'test'} />
+        <Circle
+          fontColor={mode === 'rest' ? '#0000FE' : '#FF6501'}
+          total={
+            mode == 'active'
+              ? programme?.activeTime || 0
+              : programme?.restTime || 0
+          }
+          remaining={time}
+          text={time.toString()}
+        />
+        {mode === 'rest' && (
+          <Text style={{position: 'absolute', top: 20, color: 'blue'}}>
+            Rest
+          </Text>
+        )}
       </View>
+
+      <LinearGradient
+        start={{x: 0, y: 0}}
+        end={{x: 1, y: 0}}
+        colors={['#fff', '#0000FE']}
+        style={{
+          position: 'absolute',
+          opacity: 0.5,
+          zIndex: 7,
+          bottom: 0,
+          width: '100%',
+          height: '10%',
+          display: 'flex',
+          alignContent: 'center',
+          justifyContent: 'center',
+        }}>
+        <Text
+          style={{
+            fontSize: 24,
+            fontFamily: 'LeagueSpartan-ExtraBold',
+            color: '#0000FE',
+            fontStyle: 'italic',
+          }}>
+          {programme?.message?.toLocaleUpperCase()}
+        </Text>
+      </LinearGradient>
     </SafeAreaView>
   );
 }
