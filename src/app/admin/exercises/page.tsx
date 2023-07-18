@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import Icon from "@/components/icon";
 import { Exercise } from "@/app/types";
-import Link from "next/link";
 import Modal from "@/components/modal";
 import { useRouter } from "next/navigation";
 

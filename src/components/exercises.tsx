@@ -81,7 +81,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
           }
         );
 
-        return `https://signalromm3467ae.blob.core.windows.net/videos/${file.name}?sp=racw&st=2023-07-10T13:56:59Z&se=2024-01-01T22:56:59Z&spr=https&sv=2022-11-02&sr=c&sig=Bw%2BFHaT69BHnjJSgVjc37Cqh7qfSv6XS7ExiiWDJ4lQ%3D`;
+        return `https://signalromm3467ae.blob.core.windows.net/videos/${file.name}`;
       } catch (error) {
         setSubmitStatus("failed");
       } finally {
