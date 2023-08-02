@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -26,6 +27,64 @@ namespace HorizonMode.GymScreens
             log.LogInformation($"GetExerciseById function processed");
 
             return new OkObjectResult(exercise);
+        }
+
+        [FunctionName("ProcessExercises")]
+        public static async Task<IActionResult> ProcessExercises([HttpTrigger(methods: "get", Route = "exercise/process/{name}")] HttpRequest req, string name,
+        [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client,
+        [Blob("videos", Connection = "VideosStorageConnection")] BlobContainerClient blobClient, ILogger log)
+        {
+
+            log.LogInformation($"Process Exercises called for Container: {blobClient.Name}");
+
+            // get all records in the specific container
+            var blobs = blobClient.GetBlobs(prefix: name);
+
+            var exerciseContainer = client.GetContainer("screens", "exercises");
+            // create records in cosmos with the correct category
+            foreach (var blob in blobs)
+            {
+                var safeName = blob.Name;
+
+                int index = safeName.IndexOf('_');
+                safeName = (index < 0)
+                    ? safeName
+                    : safeName.Remove(index, 1);
+
+                index = safeName.IndexOf('1');
+                safeName = (index < 0)
+                    ? safeName
+                    : safeName.Remove(index, 1);
+
+                index = safeName.IndexOf('-');
+                safeName = (index < 0)
+                    ? safeName
+                    : safeName.Remove(index, 1);
+
+                safeName = safeName.Remove(0, name.Length + 1);
+
+                var fileNameWithNoExtension = Path.GetFileNameWithoutExtension(safeName);
+
+                var item = exerciseContainer.GetItemLinqQueryable<Exercise>(true).AsEnumerable().FirstOrDefault(ex => ex.VideoFileName == blob.Name);
+                if (item == null)
+                {
+                    item = new Exercise
+                    {
+                        id = Guid.NewGuid().ToString(),
+
+                    };
+                }
+
+                item.Name = fileNameWithNoExtension;
+                item.Title = fileNameWithNoExtension;
+                item.VideoFileName = blob.Name;
+                item.VideoUrl = $"{blobClient.Uri}/{blob.Name}";
+                item.Category = name;
+
+                await exerciseContainer.UpsertItemAsync<Exercise>(item);
+            }
+
+            return new OkResult();
         }
 
         [FunctionName("GetExercises")]

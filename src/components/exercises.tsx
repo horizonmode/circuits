@@ -266,7 +266,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
         )}
         {submitting && <Loader />}
         <Link
-          href="/admin/exercises"
+          href="/exercises"
           className="text-sm font-semibold leading-6 text-gray-900"
         >
           Back

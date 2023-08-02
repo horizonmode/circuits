@@ -21,16 +21,16 @@ namespace HorizonMode.GymScreens
         public static async Task Broadcast([TimerTrigger("* * * * * *")] TimerInfo myTimer,
         [SignalR(HubName = "serverless_dev")] IAsyncCollector<SignalRMessage> signalRMessages,
         [CosmosDB(
-                databaseName: "screens",
-                containerName: "programmes",
-                Id = "active",
-                PartitionKey ="active",
-                Connection = "CosmosDBConnection")] ActiveProgramme workout,
+                    databaseName: "screens",
+                    containerName: "programmes",
+                    Id = "active",
+                    PartitionKey ="active",
+                    Connection = "CosmosDBConnection")] ActiveProgramme workout,
                 [CosmosDB(
-                databaseName: "screens",
-                containerName: "programmes",
-                Connection = "CosmosDBConnection")]
-                IAsyncCollector<ActiveProgramme> programmesOut,
+                    databaseName: "screens",
+                    containerName: "programmes",
+                    Connection = "CosmosDBConnection")]
+                    IAsyncCollector<ActiveProgramme> programmesOut,
                 ILogger log)
         {
 
@@ -50,7 +50,7 @@ namespace HorizonMode.GymScreens
                 new SignalRMessage
                 {
                     Target = "newMessage",
-                    Arguments = new[] { $"{timeLeft}", $"{mode}", $"{workout.SourceWorkoutId}", $"{workout.LastUpdated}" }
+                    Arguments = new[] { $"{timeLeft}", $"{mode}", $"{workout.SourceWorkoutId}", workout.LastUpdated.ToString("s") }
                 });
         }
     }

@@ -30,6 +30,7 @@ export interface Exercise extends Dto {
   title: string;
   videoUrl: string;
   videoFileName: string;
+  category: string;
 }
 
 export interface Dto {

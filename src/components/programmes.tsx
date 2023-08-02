@@ -298,11 +298,11 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
               </label>
               {screenMaps.map((s, i) => (
                 <ScreenMap
+                  index={i}
                   key={`screenmap-${i}`}
                   screenMap={s}
                   exerciseOptions={exerciseOptions}
                   onChange={(name, e) => {
-                    console.log("screenmapchange", name, e);
                     onScreenMapChange(i, name, e);
                   }}
                 />
@@ -323,7 +323,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       <div className="mt-6 flex items-center justify-end gap-x-6">
         {submitting && <Loader />}
         <Link
-          href="/admin"
+          href="/"
           className="text-sm font-semibold leading-6 text-gray-900"
         >
           Back
@@ -342,7 +342,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
           title="Form Result"
           onAccept={() => {
             setShowModal(false);
-            submitStatus === "success" && router.push("/admin");
+            submitStatus === "success" && router.push("/");
           }}
           onCancel={() => setShowModal(false)}
           happy={submitStatus === "success"}

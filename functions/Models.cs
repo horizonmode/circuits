@@ -46,6 +46,7 @@ namespace HorizonMode.GymScreens
         public string VideoUrl { get; set; }
         public string VideoFileName { get; set; }
         public string Title { get; set; }
+        public string Category { get; set; }
     }
 
     public class Dto

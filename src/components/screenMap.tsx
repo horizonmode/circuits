@@ -4,6 +4,7 @@ import Icon from "./icon";
 
 export interface ScreenMapProps {
   screenMap: ScreenMapping;
+  index: number;
   exerciseOptions: DropDownOption[];
   onChange: (name: string, e: string | boolean) => void;
 }
@@ -11,6 +12,7 @@ export default function ScreenMap({
   screenMap,
   exerciseOptions,
   onChange,
+  index,
 }: ScreenMapProps) {
   console.log(screenMap);
   return (
@@ -22,8 +24,8 @@ export default function ScreenMap({
       <div className="relative flex gap-x-3 col-span-3 md:col-span-1 items-center">
         <div className="flex h-6 items-center">
           <input
-            id="split-screen"
-            name="split-screen"
+            id={`split-screen-${index}`}
+            name={`split-screen-${index}`}
             type="checkbox"
             checked={screenMap.splitScreen}
             className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
@@ -34,7 +36,7 @@ export default function ScreenMap({
         </div>
         <div className="text-sm leading-6 flex align-middle justify-center">
           <label
-            htmlFor="split-screen"
+            htmlFor={`split-screen-${index}`}
             className="font-medium text-gray-900 flex align-middle justify-center"
           >
             Split Screen
@@ -50,6 +52,8 @@ export default function ScreenMap({
           value={screenMap.exercise1?.id}
           label="exercise 1"
           options={exerciseOptions}
+          id="exercices-1"
+          defaultOption="Choose an Exercise"
         />
       </div>
 
@@ -61,6 +65,8 @@ export default function ScreenMap({
           value={screenMap.exercise2?.id}
           label="exercise 2"
           options={exerciseOptions}
+          id="exercices-2"
+          defaultOption="Choose an Exercise"
         />
       </div>
       <div className="col-span-2 lg:col-span-1">
