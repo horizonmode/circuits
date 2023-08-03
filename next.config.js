@@ -3,6 +3,7 @@ module.exports = {
   reactStrictMode: false,
   swcMinify: false,
   output: "export",
+  trailingSlash: true,
   images: {
     unoptimized: true,
   },

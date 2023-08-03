@@ -16,7 +16,8 @@ export interface DropDownProps {
   value: string | undefined;
   onChange: ChangeEventHandler<HTMLSelectElement>;
   id: string;
-  defaultOption: string;
+  defaultOption?: string;
+  showDefault?: boolean;
 }
 
 export default function DropDown({
@@ -26,6 +27,7 @@ export default function DropDown({
   value,
   id,
   defaultOption,
+  showDefault = true,
 }: DropDownProps) {
   return (
     <div className="relative flex gap-x-3 w-full items-left">
@@ -41,7 +43,7 @@ export default function DropDown({
         onChange={onChange}
         className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
       >
-        <option value="none">{defaultOption}</option>
+        {showDefault && <option value="none">{defaultOption}</option>}
         {options.map((o, i) => (
           <option key={`option-${i}`} value={o.value}>
             {o.label}

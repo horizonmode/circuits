@@ -45,12 +45,20 @@ export default function Admin() {
     [exercises]
   );
 
-  const [category, setCategory] = useState<string>("none");
+  const [category, setCategory] = useState<string>("back");
 
   const categoryOptions: DropDownOption[] = [
     {
-      value: "0",
+      value: "back",
       label: "back",
+    },
+    {
+      value: "legs",
+      label: "legs",
+    },
+    {
+      value: "abs",
+      label: "abs",
     },
   ];
 
@@ -66,21 +74,23 @@ export default function Admin() {
             label="Category Filter"
             options={categoryOptions}
             id="category"
-            defaultOption="All"
+            showDefault={false}
           />
         </div>
         {exercises
           .filter((e) => category === "none" || e.category === category)
+          ?.sort((a: Exercise, b: Exercise) => (a.name > b.name ? 1 : -1))
           .map((p: Exercise, i: number) => (
             <div
               key={`exercise-${i}`}
-              className="w-full relative lg:w-1/2 h-20 bg-gradient-to-r from-powder to-powder-300 flex align-middle items-center justify-start p-10 rounded-md"
+              className="w-full relative lg:w-1/2 bg-gradient-to-r from-powder to-powder-300 flex align-middle items-center justify-start p-5 rounded-md"
             >
-              <span className="text-lg w-4/5">{p.name}</span>
-              <div
-                className={`absolute -left-20 bg-no-repeat bg-contain w-20 h-20 top-1/2 -translate-y-1/2 sm:none flex align-middle`}
-              ></div>
+              <div className={`w-full flex flex-col pr-5 gap-5`}>
+                <span className="text-lg w-100">{p.name.toLowerCase()}</span>
+                <video controls src={p.videoUrl} preload="thumbnail"></video>
+              </div>
               <div className="flex flex-row justify-start gap-2">
+                <Icon type="open" onClick={() => window.open(p.videoUrl)} />
                 <Icon
                   type="edit"
                   onClick={() => router.push(`/exercises/edit/${p.id}`)}

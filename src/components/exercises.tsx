@@ -128,6 +128,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
       videoUrl: newVideoUrl,
       videoFileName,
       id: exerciseId || "",
+      category: "",
     };
 
     await submitData(values);

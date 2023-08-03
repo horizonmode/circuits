@@ -78,7 +78,7 @@ namespace HorizonMode.GymScreens
                 item.Name = fileNameWithNoExtension;
                 item.Title = fileNameWithNoExtension;
                 item.VideoFileName = blob.Name;
-                item.VideoUrl = $"{blobClient.Uri}/{blob.Name}";
+                item.VideoUrl = $"https://signalromm-videos.azureedge.net/videos/{blob.Name}";
                 item.Category = name;
 
                 await exerciseContainer.UpsertItemAsync<Exercise>(item);

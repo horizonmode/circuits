@@ -19,7 +19,8 @@ export interface ProgrammeFormProps {
   programmeId: string | null;
 }
 export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showFormModal, setFormShowModal] = useState<boolean>(false);
+  const [showDeleteModal, setDeleteShowModal] = useState<boolean>(false);
   const [name, setName] = useState<string>("");
   const [activeTime, setActiveTime] = useState<number>(0);
   const [restTime, setRestTime] = useState<number>(0);
@@ -95,7 +96,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
 
   useEffect(() => {
     if (submitStatus === "success" || submitStatus === "failed") {
-      setShowModal(true);
+      setFormShowModal(true);
     }
   }, [submitStatus]);
 
@@ -122,6 +123,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
 
   const [screenMaps, setScreenMaps] = useState<ScreenMapping[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [selectedScreenMapId, setselectedScreenMapId] = useState<number>(-1);
 
   const onScreenMapChange = useCallback(
     (index: number, name: string, e: string | boolean) => {
@@ -185,12 +187,25 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     fetchExercises();
   }, []);
 
-  const exerciseOptions = exercises?.map((e) => ({
-    value: e.id,
-    label: e.name,
-  }));
+  const exerciseOptions = exercises
+    ?.sort((a: Exercise, b: Exercise) =>
+      a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1
+    )
+    .map((e) => ({
+      value: e.id,
+      label: e.name.toLowerCase(),
+    }));
 
   const router = useRouter();
+
+  const selectForDelete = (index: number) => {
+    setselectedScreenMapId(index);
+    setDeleteShowModal(true);
+  };
+
+  const deleteScreenMap = (index: number) => {
+    setScreenMaps((s) => s.filter((_, i) => i !== index));
+  };
 
   return loading ? (
     <Loader />
@@ -305,6 +320,8 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                   onChange={(name, e) => {
                     onScreenMapChange(i, name, e);
                   }}
+                  onDelete={() => selectForDelete(i)}
+                  showDelete={i === screenMaps.length - 1}
                 />
               ))}
               <div className="w-full relative h-20 flex align-middle justify-center">
@@ -337,19 +354,37 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
           Save
         </button>
       </div>
-      {showModal && (
+      {showFormModal && (
         <Modal
           title="Form Result"
           onAccept={() => {
-            setShowModal(false);
+            setFormShowModal(false);
             submitStatus === "success" && router.push("/");
           }}
-          onCancel={() => setShowModal(false)}
+          onCancel={() => setFormShowModal(false)}
           happy={submitStatus === "success"}
         >
           <div>
             {submitStatus === "success" ? "Submit Success" : "Submit Failed"}
           </div>
+        </Modal>
+      )}
+      {showDeleteModal && (
+        <Modal
+          happy={false}
+          title="are you sure"
+          okText="Yes"
+          showCancel={true}
+          onAccept={() => {
+            deleteScreenMap(selectedScreenMapId);
+            setDeleteShowModal(false);
+          }}
+          onCancel={() => {
+            setDeleteShowModal(false);
+            setselectedScreenMapId(-1);
+          }}
+        >
+          <div>Are you sure you want to delete this exercise?</div>
         </Modal>
       )}
     </form>

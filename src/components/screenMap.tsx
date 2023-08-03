@@ -7,12 +7,16 @@ export interface ScreenMapProps {
   index: number;
   exerciseOptions: DropDownOption[];
   onChange: (name: string, e: string | boolean) => void;
+  onDelete: () => void;
+  showDelete?: boolean;
 }
 export default function ScreenMap({
   screenMap,
   exerciseOptions,
   onChange,
   index,
+  onDelete,
+  showDelete = false,
 }: ScreenMapProps) {
   console.log(screenMap);
   return (
@@ -69,9 +73,16 @@ export default function ScreenMap({
           defaultOption="Choose an Exercise"
         />
       </div>
-      <div className="col-span-2 lg:col-span-1">
-        <Icon type="del" />
-      </div>
+      {showDelete && (
+        <div className="col-span-2 lg:col-span-1">
+          <Icon
+            type="del"
+            onClick={() => {
+              onDelete();
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
