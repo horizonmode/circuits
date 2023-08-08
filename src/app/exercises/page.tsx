@@ -72,6 +72,10 @@ export default function Admin() {
       value: "abs",
       label: "abs",
     },
+    {
+      value: "biceps",
+      label: "biceps",
+    },
   ];
 
   return (

@@ -38,6 +38,9 @@ namespace HorizonMode.GymScreens
         public bool SplitScreen { get; set; }
         public Exercise Exercise1 { get; set; }
         public Exercise Exercise2 { get; set; }
+        public string ScreenTitle1 { get; set; }
+        public string ScreenTitle2 { get; set; }
+        public bool ShowTimer { get; set; }
     }
 
     public class Exercise : Dto

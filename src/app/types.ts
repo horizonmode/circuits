@@ -23,6 +23,9 @@ export interface ScreenMapping {
   splitScreen: boolean;
   exercise1: Exercise | null;
   exercise2: Exercise | null;
+  showTimer: boolean;
+  screenTitle1: string | null;
+  screenTitle2: string | null;
 }
 
 export interface Exercise extends Dto {

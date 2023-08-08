@@ -167,6 +167,30 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
           });
           break;
         }
+        case "show-timer": {
+          setScreenMaps((s) => {
+            const newMaps = [...s];
+            newMaps[index].showTimer = e as boolean;
+            return newMaps;
+          });
+          break;
+        }
+        case "screen-title-1": {
+          setScreenMaps((s) => {
+            const newMaps = [...s];
+            newMaps[index].screenTitle1 = e as string;
+            return newMaps;
+          });
+          break;
+        }
+        case "screen-title-2": {
+          setScreenMaps((s) => {
+            const newMaps = [...s];
+            newMaps[index].screenTitle2 = e as string;
+            return newMaps;
+          });
+          break;
+        }
       }
     },
     [exercises, setScreenMaps]
@@ -242,6 +266,10 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     {
       value: "abs",
       label: "abs",
+    },
+    {
+      value: "biceps",
+      label: "biceps",
     },
   ];
 

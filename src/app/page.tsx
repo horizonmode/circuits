@@ -87,11 +87,6 @@ export default function Admin() {
                     ? " from-powder to-powder-300"
                     : " from-gray-400 to-gray-50"
                 }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setNewActive(p.id);
-                }}
               >
                 <span className="text-lg w-4/5">{p.name}</span>
                 <div
@@ -100,6 +95,7 @@ export default function Admin() {
                   {activeProgramme === p.id && <Arrow />}
                 </div>
                 <div className="flex flex-row justify-start gap-2">
+                  <Icon type="play" onClick={() => setNewActive(p.id)} />
                   <Icon
                     type="edit"
                     onClick={() => router.push(`/programmes/edit/?id=${p.id}`)}
