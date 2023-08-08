@@ -102,7 +102,7 @@ export default function Admin() {
                 <div className="flex flex-row justify-start gap-2">
                   <Icon
                     type="edit"
-                    onClick={() => router.push(`/programmes/edit/${p.id}`)}
+                    onClick={() => router.push(`/programmes/edit/?id=${p.id}`)}
                   />
                   <Icon type="del" onClick={() => selectForDelete(p.id)} />
                 </div>

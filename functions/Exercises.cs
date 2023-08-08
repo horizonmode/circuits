@@ -10,6 +10,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Primitives;
 
 namespace HorizonMode.GymScreens
 {
@@ -87,18 +88,57 @@ namespace HorizonMode.GymScreens
             return new OkResult();
         }
 
-        [FunctionName("GetExercises")]
-        public static IActionResult GetExercises([HttpTrigger(methods: "get", Route = "exercise")] HttpRequest req,
-        [CosmosDB(
-                databaseName: "screens",
-                containerName: "exercises",
-                Connection = "CosmosDBConnection",
-                SqlQuery = "SELECT * FROM c order by c._ts desc")]
-                IEnumerable<Exercise> exercises, ILogger log)
+        [FunctionName("GetExerciseSearch")]
+        public static IActionResult GetExercisesSearch([HttpTrigger(methods: "get", Route = "searchEx")] HttpRequest req,
+       [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client, ILogger log)
         {
             log.LogInformation($"GetExercises function processed");
 
-            return new OkObjectResult(exercises);
+            var exerciseContainer = client.GetContainer("screens", "exercises");
+
+            string search = req.Query["search"];
+
+            if (String.IsNullOrWhiteSpace(search))
+            {
+                return new BadRequestResult();
+            }
+
+            int page = int.Parse(req.Query["page"] != StringValues.Empty ? req.Query["page"] : "0");
+            int num = int.Parse(req.Query["num"] != StringValues.Empty ? req.Query["num"] : "100");
+
+            var results = exerciseContainer.GetItemLinqQueryable<Exercise>(
+                       true
+                    )
+                    .Where(ex => ex.Title.ToLower().Contains(search.ToLower()))
+                    .Skip(page * num)
+                    .Take(num)
+                    .AsEnumerable()
+                    .ToList();
+
+            return new OkObjectResult(results);
+        }
+
+
+        [FunctionName("GetExercises")]
+        public static IActionResult GetExercises([HttpTrigger(methods: "get", Route = "exercise")] HttpRequest req,
+        [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client, ILogger log)
+        {
+            log.LogInformation($"GetExercises function processed");
+
+            var exerciseContainer = client.GetContainer("screens", "exercises");
+
+            int page = int.Parse(req.Query["page"] != StringValues.Empty ? req.Query["page"] : "0");
+            int num = int.Parse(req.Query["num"] != StringValues.Empty ? req.Query["num"] : "100");
+
+            var results = exerciseContainer.GetItemLinqQueryable<Exercise>(
+                       true
+                    )
+                    .Skip(page * num)
+                    .Take(num)
+                    .AsEnumerable()
+                    .ToList();
+
+            return new OkObjectResult(results);
         }
 
         [FunctionName("CreateExercise")]

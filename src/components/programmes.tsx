@@ -12,6 +12,7 @@ import Link from "next/link";
 import Icon from "./icon";
 import ScreenMap from "./screenMap";
 import { useRouter } from "next/navigation";
+import DropDown, { DropDownOption } from "./dropdown";
 
 export type SubmitStatus = "success" | "failed" | "waiting" | "submitting";
 
@@ -207,11 +208,80 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     setScreenMaps((s) => s.filter((_, i) => i !== index));
   };
 
+  const [showExDrawer, setShowExDrawer] = useState(false);
+
+  const [category, setCategory] = useState<string>("back");
+
+  const categoryOptions: DropDownOption[] = [
+    {
+      value: "back",
+      label: "back",
+    },
+    {
+      value: "legs",
+      label: "legs",
+    },
+    {
+      value: "abs",
+      label: "abs",
+    },
+  ];
+
+  const OnFilterDropdownChange = useCallback(
+    (e: string) => {
+      setCategory(e);
+    },
+    [exercises]
+  );
+
+  interface selectedEx {
+    screenMapIndex: number;
+    exIndex: number;
+  }
+
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null
+  );
+
+  const [selectedExerciseForEdit, setSelectedExerciseForEdit] =
+    useState<selectedEx | null>(null);
+
+  const OnScreenMapExEdit = (screenMapIndex: number, exIndex: number) => {
+    setSelectedExerciseForEdit({ screenMapIndex, exIndex });
+    setShowExDrawer(true);
+  };
+
+  useEffect(() => {
+    if (showExDrawer) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+  }, [showExDrawer]);
+
+  const updateExercise = () => {
+    console.log(selectedExerciseForEdit);
+    if (selectedExerciseForEdit) {
+      const newMaps = [...screenMaps];
+      const map = newMaps[selectedExerciseForEdit?.screenMapIndex];
+      if (selectedExerciseForEdit.exIndex === 1) {
+        map.exercise1 = selectedExercise;
+      } else {
+        map.exercise2 = selectedExercise;
+      }
+      console.log(screenMaps);
+      setScreenMaps(newMaps);
+    }
+  };
+
   return loading ? (
     <Loader />
   ) : (
     <form onSubmit={(e) => onSubmitForm(e)}>
-      <div className="space-y-12">
+      <div
+        className={`space-y-12 ${showExDrawer && "pointer-events-none filter"}`}
+        style={{ filter: showExDrawer ? "blur(1px)" : "none" }}
+      >
         <div className="border-b border-gray-900/10 pb-12">
           <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
             <div className="col-span-6 lg:col-span-3">
@@ -322,6 +392,12 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                   }}
                   onDelete={() => selectForDelete(i)}
                   showDelete={i === screenMaps.length - 1}
+                  onExerciseEdit={(ex) => OnScreenMapExEdit(i, ex)}
+                  selectedEx={
+                    selectedExerciseForEdit?.screenMapIndex === i
+                      ? selectedExerciseForEdit.exIndex
+                      : null
+                  }
                 />
               ))}
               <div className="w-full relative h-20 flex align-middle justify-center">
@@ -387,6 +463,74 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
           <div>Are you sure you want to delete this exercise?</div>
         </Modal>
       )}
+      <div className="flex ">
+        <div
+          className={`fixed top-0 right-0 z-20 w-80 h-full transition-all duration-500 transform bg-white shadow-lg ${
+            !showExDrawer && "translate-x-full"
+          }`}
+        >
+          <div className="p-1 overflow-y-auto overflow-x-hidden max-h-full m-4 flex flex-col gap-2">
+            <h2 className="text-lg font-semibold">Exercises</h2>
+            <DropDown
+              onChange={(e) => {
+                OnFilterDropdownChange(e.target.value);
+              }}
+              value={category}
+              label="Category Filter"
+              options={categoryOptions}
+              id="category"
+              showDefault={false}
+            />
+            <button
+              onClick={() => {
+                updateExercise();
+                setShowExDrawer(false);
+                setSelectedExerciseForEdit(null);
+                setSelectedExercise(null);
+              }}
+              disabled={selectedExercise == null}
+              type="button"
+              className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+              Save
+            </button>
+            <button
+              onClick={() => {
+                setShowExDrawer(false);
+                setSelectedExerciseForEdit(null);
+                setSelectedExercise(null);
+              }}
+              type="button"
+              className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+            >
+              Cancel
+            </button>
+            {exercises
+              .filter((e) => category === "none" || e.category === category)
+              ?.sort((a: Exercise, b: Exercise) => (a.name > b.name ? 1 : -1))
+              .map((p: Exercise, i: number) => (
+                <div
+                  key={`exercise-${i}`}
+                  className={`w-full relative bg-gradient-to-r from-powder to-powder-300 flex align-middle items-center justify-start p-3 rounded-md ${
+                    selectedExercise?.id === p.id
+                      ? "outline outline-3 outline-blue-700"
+                      : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedExercise(p);
+                  }}
+                >
+                  <div className={`w-full flex flex-col gap-5`}>
+                    <span className="text-md w-100">
+                      {p.name.toLowerCase()}
+                    </span>
+                    <video controls src={p.videoUrl} preload="metadata"></video>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+      </div>
     </form>
   );
 }
