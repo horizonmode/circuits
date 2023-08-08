@@ -103,19 +103,37 @@ namespace HorizonMode.GymScreens
                 return new BadRequestResult();
             }
 
+            string category = req.Query["category"];
+            if (string.IsNullOrEmpty(category))
+            {
+                return new BadRequestResult();
+            }
+
             int page = int.Parse(req.Query["page"] != StringValues.Empty ? req.Query["page"] : "0");
             int num = int.Parse(req.Query["num"] != StringValues.Empty ? req.Query["num"] : "100");
+
+            var numResults = exerciseContainer.GetItemLinqQueryable<Exercise>(
+                      true
+                   )
+                  .Where(ex => ex.Category == category && ex.Title.ToLower().Contains(search.ToLower()))
+                   .Count();
 
             var results = exerciseContainer.GetItemLinqQueryable<Exercise>(
                        true
                     )
-                    .Where(ex => ex.Title.ToLower().Contains(search.ToLower()))
+                    .Where(ex => ex.Category == category && ex.Title.ToLower().Contains(search.ToLower()))
                     .Skip(page * num)
                     .Take(num)
                     .AsEnumerable()
                     .ToList();
 
-            return new OkObjectResult(results);
+            return new OkObjectResult(new ExerciseResult { Count = numResults, Results = results });
+        }
+
+        class ExerciseResult
+        {
+            public List<Exercise> Results { get; set; }
+            public int Count { get; set; }
         }
 
 
@@ -124,21 +142,33 @@ namespace HorizonMode.GymScreens
         [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client, ILogger log)
         {
             log.LogInformation($"GetExercises function processed");
-
-            var exerciseContainer = client.GetContainer("screens", "exercises");
+            string category = req.Query["category"];
+            if (string.IsNullOrEmpty(category))
+            {
+                return new BadRequestResult();
+            }
 
             int page = int.Parse(req.Query["page"] != StringValues.Empty ? req.Query["page"] : "0");
             int num = int.Parse(req.Query["num"] != StringValues.Empty ? req.Query["num"] : "100");
 
+            var exerciseContainer = client.GetContainer("screens", "exercises");
+
+            var numResults = exerciseContainer.GetItemLinqQueryable<Exercise>(
+                       true
+                    )
+                    .Where(ex => ex.Category == category)
+                    .Count();
+
             var results = exerciseContainer.GetItemLinqQueryable<Exercise>(
                        true
                     )
+                    .Where(ex => ex.Category == category)
                     .Skip(page * num)
                     .Take(num)
                     .AsEnumerable()
                     .ToList();
 
-            return new OkObjectResult(results);
+            return new OkObjectResult(new ExerciseResult { Count = numResults, Results = results });
         }
 
         [FunctionName("CreateExercise")]

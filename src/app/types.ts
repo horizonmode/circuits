@@ -36,3 +36,8 @@ export interface Exercise extends Dto {
 export interface Dto {
   id: string;
 }
+
+export interface ExerciseResult {
+  results: Exercise[];
+  count: number;
+}

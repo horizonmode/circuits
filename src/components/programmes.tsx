@@ -6,7 +6,12 @@ import {
   useState,
 } from "react";
 import Modal from "./modal";
-import { Exercise, Programme, ScreenMapping } from "@/app/types";
+import {
+  Exercise,
+  ExerciseResult,
+  Programme,
+  ScreenMapping,
+} from "@/app/types";
 import Loader from "./loader";
 import Link from "next/link";
 import Icon from "./icon";
@@ -32,6 +37,12 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
   const [loading, setLoading] = useState<boolean>(true);
 
   const [programme, setProgramme] = useState<Programme | null>(null);
+
+  const [page, setPage] = useState<number>(0);
+  const num = 10;
+  const [search, setSearch] = useState<string>("");
+  const [totalCount, setTotalCount] = useState<number>(0);
+
   useEffect(() => {
     const fetchProgramme = async () => {
       const res = await fetch(
@@ -177,16 +188,25 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     ]);
   };
 
+  const [category, setCategory] = useState<string>("back");
+
   const fetchExercises = async () => {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/exercise?code=${process.env.NEXT_PUBLIC_API_KEY}`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/${
+        search ? "searchEx" : "exercise"
+      }?code=${
+        process.env.NEXT_PUBLIC_API_KEY
+      }&num=${num}&page=${page}&category=${category}${
+        search && "&search=" + encodeURIComponent(search)
+      }`
     );
-    const data = await res.json();
-    setExercises(data);
+    const data = (await res.json()) as ExerciseResult;
+    setExercises(data.results);
+    setTotalCount(data.count);
   };
   useEffect(() => {
     fetchExercises();
-  }, []);
+  }, [num, page, category]);
 
   const exerciseOptions = exercises
     ?.sort((a: Exercise, b: Exercise) =>
@@ -209,8 +229,6 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
   };
 
   const [showExDrawer, setShowExDrawer] = useState(false);
-
-  const [category, setCategory] = useState<string>("back");
 
   const categoryOptions: DropDownOption[] = [
     {
@@ -260,7 +278,6 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
   }, [showExDrawer]);
 
   const updateExercise = () => {
-    console.log(selectedExerciseForEdit);
     if (selectedExerciseForEdit) {
       const newMaps = [...screenMaps];
       const map = newMaps[selectedExerciseForEdit?.screenMapIndex];
@@ -269,7 +286,6 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       } else {
         map.exercise2 = selectedExercise;
       }
-      console.log(screenMaps);
       setScreenMaps(newMaps);
     }
   };
@@ -465,12 +481,67 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       )}
       <div className="flex ">
         <div
-          className={`fixed top-0 right-0 z-20 w-80 h-full transition-all duration-500 transform bg-white shadow-lg ${
+          className={`fixed top-0 right-0 z-20 w-80 h-full transition-all duration-500 transform bg-white shadow-lg flex flex-col ${
             !showExDrawer && "translate-x-full"
           }`}
         >
-          <div className="p-1 overflow-y-auto overflow-x-hidden max-h-full m-4 flex flex-col gap-2">
+          <div className="sticky self-start top-0 bg-white z-20 flex flex-col gap-2 p-3">
             <h2 className="text-lg font-semibold">Exercises</h2>
+            <form
+              id="search"
+              name="search"
+              className="flex items-center"
+              onSubmit={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                fetchExercises();
+              }}
+            >
+              <label htmlFor="simple-search" className="sr-only">
+                Search
+              </label>
+              <div className="relative w-full">
+                <input
+                  form="search"
+                  type="text"
+                  id="simple-search"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-2 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  placeholder="Search exercise name..."
+                  value={search}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    setSearch(e.target.value);
+                  }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                form="search"
+                onClick={(e) => {
+                  e.preventDefault();
+                  fetchExercises();
+                }}
+                className="p-2.5 ml-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+              >
+                <svg
+                  className="w-4 h-4"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+                  />
+                </svg>
+                <span className="sr-only">Search</span>
+              </button>
+            </form>
             <DropDown
               onChange={(e) => {
                 OnFilterDropdownChange(e.target.value);
@@ -481,6 +552,39 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
               id="category"
               showDefault={false}
             />
+            <div className="flex flex-1 justify-between gap-2">
+              <button
+                disabled={page === 0}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (page === 0) return;
+                  setPage((p) => p - 1);
+                }}
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              <span className="text-xs">
+                Showing <span className="text-xs">{page * num}</span> to{" "}
+                <span className="text-xs">
+                  {Math.min(page * num + num, totalCount)}
+                </span>{" "}
+                of <span className="text-xs">{totalCount}</span> results
+              </span>
+              <button
+                disabled={page + 1 >= Math.ceil(totalCount / num)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (page + 1 < Math.ceil(totalCount / num))
+                    setPage((p) => p + 1);
+                }}
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
             <button
               onClick={() => {
                 updateExercise();
@@ -505,8 +609,9 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
             >
               Cancel
             </button>
+          </div>
+          <div className="p-1 overflow-y-auto overflow-x-hidden max-h-full m-4 flex flex-col gap-2 ">
             {exercises
-              .filter((e) => category === "none" || e.category === category)
               ?.sort((a: Exercise, b: Exercise) => (a.name > b.name ? 1 : -1))
               .map((p: Exercise, i: number) => (
                 <div

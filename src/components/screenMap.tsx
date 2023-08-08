@@ -24,7 +24,7 @@ export default function ScreenMap({
   selectedEx,
 }: ScreenMapProps) {
   return (
-    <div className="w-full relative mb-5 bg-gradient-to-r from-powder to-powder-300 grid grid-cols-7 gap-2 p-5 rounded-md">
+    <div className="w-full relative mb-5 bg-gradient-to-r from-powder to-powder-300 grid grid-cols-7 gap-2 p-5 rounded-md ">
       <span className="text-lg col-span-2 md:col-span-1 flex flex-col align-middle justify-center">
         {screenMap.screen.tag}
       </span>
@@ -54,7 +54,7 @@ export default function ScreenMap({
 
       <div className="col-span-5 md:col-span-4 lg:col-span-2 ">
         <div
-          className={`w-full relative bg-blue-800 flex align-middle items-center justify-start p-3 rounded-md ${
+          className={`w-full relative bg-black flex align-middle items-center justify-start p-3 rounded-md ${
             selectedEx === 1 && "bg-gray-800 outline-dashed outline-black"
           }`}
         >
@@ -69,6 +69,7 @@ export default function ScreenMap({
             ></video>
             <div className="absolute top-1 right-1">
               <Icon
+                invert={true}
                 type="edit"
                 onClick={() => {
                   onExerciseEdit && onExerciseEdit(1);
@@ -77,7 +78,7 @@ export default function ScreenMap({
             </div>
           </div>
           {(selectedEx === 1 || screenMap.exercise1 === null) && (
-            <div className="absolute left-0 top-0 bg-blue-800 bottom-0 right-0 flex align-middle content-center z-30 justify-center items-center">
+            <div className="absolute left-0 top-0 bg-black bottom-0 right-0 flex align-middle content-center z-30 justify-center items-center">
               <Icon
                 type="edit"
                 onClick={() => {
@@ -91,7 +92,7 @@ export default function ScreenMap({
       {screenMap.splitScreen && (
         <div className="col-span-5 md:col-span-4 lg:col-span-2">
           <div
-            className={`w-full relative bg-blue-800 flex align-middle items-center justify-start p-3 rounded-md ${
+            className={`w-full relative bg-black flex align-middle items-center justify-start p-3 rounded-md ${
               selectedEx === 2 && "bg-white outline-dashed outline-black"
             }`}
           >
@@ -114,7 +115,7 @@ export default function ScreenMap({
               </div>
             </div>
             {(selectedEx === 2 || screenMap.exercise2 === null) && (
-              <div className="absolute left-0 top-0 bg-blue-800 bottom-0 right-0 flex align-middle content-center z-30 justify-center items-center">
+              <div className="absolute left-0 top-0 bg-white bottom-0 right-0 flex align-middle content-center z-30 justify-center items-center">
                 <Icon
                   type="edit"
                   onClick={() => {

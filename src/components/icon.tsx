@@ -1,6 +1,7 @@
 export type IconProps = {
   type: "edit" | "add" | "del" | "open";
   onClick?: (() => void) | null;
+  invert?: boolean;
 };
 
 const del = (
@@ -72,7 +73,7 @@ const open = (
   </svg>
 );
 
-function Icon({ type, onClick }: IconProps) {
+function Icon({ type, onClick, invert = false }: IconProps) {
   return (
     <div
       onClick={(e) => {
@@ -80,7 +81,9 @@ function Icon({ type, onClick }: IconProps) {
         e.preventDefault();
         onClick && onClick();
       }}
-      className="w-10 h-10 border-2 border-black rounded-full cursor-pointer p-2 hover:bg-black hover:text-white"
+      className={`w-10 h-10 border-2 border-black rounded-full cursor-pointer p-2 hover:bg-black hover:text-white ${
+        invert && "border-white"
+      }`}
     >
       {type === "edit"
         ? edit

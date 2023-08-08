@@ -82,7 +82,7 @@ export default function Admin() {
             .map((p: Programme, i: number) => (
               <div
                 key={`programme-${i}`}
-                className={`w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-10 rounded-md ${
+                className={`shadow-md w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-10 rounded-md ${
                   activeProgramme === p.id
                     ? " from-powder to-powder-300"
                     : " from-gray-400 to-gray-50"
