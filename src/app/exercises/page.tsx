@@ -76,6 +76,34 @@ export default function Admin() {
       value: "biceps",
       label: "biceps",
     },
+    {
+      value: "cardio",
+      label: "cardio",
+    },
+    {
+      value: "chest",
+      label: "chest",
+    },
+    {
+      value: "forearms",
+      label: "forearms",
+    },
+    {
+      value: "powerlifting",
+      label: "powerlifting",
+    },
+    {
+      value: "shoulders",
+      label: "shoulders",
+    },
+    {
+      value: "stretching",
+      label: "stretching",
+    },
+    {
+      value: "triceps",
+      label: "triceps",
+    },
   ];
 
   return (

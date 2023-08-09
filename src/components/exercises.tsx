@@ -11,6 +11,7 @@ import Loader from "./loader";
 import Link from "next/link";
 import axios, { AxiosProgressEvent } from "axios";
 import Icon from "./icon";
+import DropDown, { DropDownOption } from "./dropdown";
 
 export type SubmitStatus = "success" | "failed" | "waiting" | "submitting";
 
@@ -24,6 +25,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
   const [videoUrl, setVideoUrl] = useState<string>("");
   const [videoFileName, setVideoFileName] = useState<string>("");
   const [file, setFile] = useState<File | null>(null);
+  const [category, setCategory] = useState<string>("back");
   const mode = exerciseId ? "edit" : "create";
 
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -128,7 +130,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
       videoUrl: newVideoUrl,
       videoFileName,
       id: exerciseId || "",
-      category: "",
+      category,
     };
 
     await submitData(values);
@@ -147,7 +149,10 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
     }
   }, [file]);
 
-  const onInputChange = (name: string, e: ChangeEvent<HTMLInputElement>) => {
+  const onInputChange = (
+    name: string,
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     switch (name) {
       case "name":
         setName((e.target as any).value);
@@ -155,12 +160,62 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
       case "title":
         setTitle((e.target as any).value);
         break;
+      case "category":
+        setCategory((e.target as any).value);
+        break;
       case "file": {
         setFile((e.target as any).files[0]);
         break;
       }
     }
   };
+
+  const categoryOptions: DropDownOption[] = [
+    {
+      value: "back",
+      label: "back",
+    },
+    {
+      value: "legs",
+      label: "legs",
+    },
+    {
+      value: "abs",
+      label: "abs",
+    },
+    {
+      value: "biceps",
+      label: "biceps",
+    },
+    {
+      value: "cardio",
+      label: "cardio",
+    },
+    {
+      value: "chest",
+      label: "chest",
+    },
+    {
+      value: "forearms",
+      label: "forearms",
+    },
+    {
+      value: "powerlifting",
+      label: "powerlifting",
+    },
+    {
+      value: "shoulders",
+      label: "shoulders",
+    },
+    {
+      value: "stretching",
+      label: "stretching",
+    },
+    {
+      value: "triceps",
+      label: "triceps",
+    },
+  ];
 
   const submitting = submitStatus === "submitting";
 
@@ -249,6 +304,18 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
                   />
                 </div>
               )}
+            </div>
+            <div className="col-span-full md:col-span-2">
+              <DropDown
+                onChange={(e) => {
+                  onInputChange("category", e);
+                }}
+                value={category}
+                label="Category Filter"
+                options={categoryOptions}
+                id="category"
+                showDefault={false}
+              />
             </div>
           </div>
         </div>
