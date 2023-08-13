@@ -6,10 +6,14 @@ import Icon from "@/components/icon";
 import Modal from "@/components/modal";
 import { useRouter } from "next/navigation";
 import Loader from "@/components/loader";
+import { Badge, Card, Title } from "@tremor/react";
+import { WifiIcon } from "@heroicons/react/24/outline";
+import { Icon as TremorIcon } from "@tremor/react";
 
 export default function Admin() {
   const [programmes, setProgrammes] = useState<Programme[]>([]);
   const [activeProgramme, setActiveProgramme] = useState<string>("");
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(true);
 
   const fetchProgrammes = async () => {
@@ -27,6 +31,7 @@ export default function Admin() {
     if (!res.ok) return;
     const data = await res.json();
     setActiveProgramme(data.sourceWorkoutId);
+    setIsPlaying(data.isPlaying);
   };
 
   useEffect(() => {
@@ -36,14 +41,18 @@ export default function Admin() {
     setLoading(false);
   }, []);
 
-  const setNewActive = (workoutId: string) => {
+  const setNewActive = (workoutId: string, isPlaying: boolean) => {
     if (!workoutId) return;
     const send = async () => {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/programme/setActive/${workoutId}?code=${process.env.NEXT_PUBLIC_API_KEY}`
+        `${process.env.NEXT_PUBLIC_API_URL}/api/programme/setActive/${workoutId}?code=${process.env.NEXT_PUBLIC_API_KEY}&isPlaying=${isPlaying}`
       );
       const data = await res.json();
-      setActiveProgramme(workoutId);
+      const programme = programmes.find((p) => p.id === workoutId);
+      if (programme) {
+        setIsPlaying(isPlaying);
+        setActiveProgramme(programme.id);
+      }
     };
 
     send();
@@ -69,10 +78,9 @@ export default function Admin() {
   };
 
   const router = useRouter();
-
   console.log(activeProgramme);
   return (
-    <main className="flex flex-col items-left align-left ">
+    <main className="flex flex-col items-left align-left bg-tremor-background-muted">
       {loading ? (
         <Loader />
       ) : (
@@ -80,7 +88,11 @@ export default function Admin() {
           {programmes
             .filter((p) => p.id !== "active")
             .map((p: Programme, i: number) => (
-              <div
+              <Card
+                decoration="left"
+                decorationColor={`${
+                  activeProgramme === p.id ? "indigo" : "slate"
+                }`}
                 key={`programme-${i}`}
                 className={`shadow-md w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-10 rounded-md ${
                   activeProgramme === p.id
@@ -88,21 +100,30 @@ export default function Admin() {
                     : " from-gray-400 to-gray-50"
                 }`}
               >
-                <span className="text-lg w-4/5">{p.name}</span>
-                <div
-                  className={`absolute -left-20 bg-no-repeat bg-contain w-20 h-20 top-1/2 -translate-y-1/2 sm:none flex align-middle`}
-                >
-                  {activeProgramme === p.id && <Arrow />}
-                </div>
+                <Title className="flex-1">{p.name}</Title>
                 <div className="flex flex-row justify-start gap-2">
-                  <Icon type="play" onClick={() => setNewActive(p.id)} />
+                  {activeProgramme === p.id && (
+                    <Badge icon={WifiIcon}>live</Badge>
+                  )}
+
+                  <Icon
+                    type={`${
+                      activeProgramme === p.id && isPlaying ? "pause" : "play"
+                    }`}
+                    onClick={() =>
+                      setNewActive(
+                        p.id,
+                        p.id === activeProgramme ? !isPlaying : true
+                      )
+                    }
+                  />
                   <Icon
                     type="edit"
                     onClick={() => router.push(`/programmes/edit/?id=${p.id}`)}
                   />
                   <Icon type="del" onClick={() => selectForDelete(p.id)} />
                 </div>
-              </div>
+              </Card>
             ))}
           <div className="w-full relative lg:w-1/2 h-20 flex align-middle justify-center">
             <Icon

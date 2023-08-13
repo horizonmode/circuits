@@ -18,6 +18,7 @@ import Icon from "./icon";
 import ScreenMap from "./screenMap";
 import { useRouter } from "next/navigation";
 import DropDown, { DropDownOption } from "./dropdown";
+import { Card } from "@tremor/react";
 
 export type SubmitStatus = "success" | "failed" | "waiting" | "submitting";
 
@@ -99,9 +100,8 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       sourceWorkoutId: "",
       mappings: screenMaps,
       lastUpdated: new Date(),
+      isPlaying: true,
     };
-
-    console.log(values);
 
     await submitData(values);
   };
@@ -355,8 +355,8 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
         style={{ filter: showExDrawer ? "blur(1px)" : "none" }}
       >
         <div className="border-b border-gray-900/10 pb-12">
-          <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div className="col-span-6 lg:col-span-3">
+          <div className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+            <Card className="col-span-6 lg:col-span-3">
               <label
                 htmlFor="name"
                 className="block text-sm font-medium leading-6 text-gray-900"
@@ -379,56 +379,56 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                   />
                 </div>
               </div>
-            </div>
-            <div className="col-span-6 lg:col-span-3">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Active Time
-              </label>
-              <div className="mt-2">
-                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                  <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"></span>
-                  <input
-                    type="number"
-                    name="activeTime"
-                    id="activeTime"
-                    autoComplete="activeTime"
-                    className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                    placeholder="0"
-                    required
-                    value={activeTime}
-                    onChange={(e) => onInputChange("activeTime", e)}
-                  />
+              <div className="col-span-6 lg:col-span-3">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Active Time
+                </label>
+                <div className="mt-2">
+                  <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                    <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"></span>
+                    <input
+                      type="number"
+                      name="activeTime"
+                      id="activeTime"
+                      autoComplete="activeTime"
+                      className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                      placeholder="0"
+                      required
+                      value={activeTime}
+                      onChange={(e) => onInputChange("activeTime", e)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="col-span-6 lg:col-span-3">
-              <label
-                htmlFor="name"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Rest Time
-              </label>
-              <div className="mt-2">
-                <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                  <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"></span>
-                  <input
-                    type="number"
-                    name="restTime"
-                    id="restTime"
-                    autoComplete="restTime"
-                    className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                    placeholder="0"
-                    required
-                    value={restTime}
-                    onChange={(e) => onInputChange("restTime", e)}
-                  />
+              <div className="col-span-6 lg:col-span-3">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Rest Time
+                </label>
+                <div className="mt-2">
+                  <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                    <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"></span>
+                    <input
+                      type="number"
+                      name="restTime"
+                      id="restTime"
+                      autoComplete="restTime"
+                      className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                      placeholder="0"
+                      required
+                      value={restTime}
+                      onChange={(e) => onInputChange("restTime", e)}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="col-span-6 lg:col-span-3">
+            </Card>
+            <Card className="col-span-6 lg:col-span-3">
               <label
                 htmlFor="about"
                 className="block text-sm font-medium leading-6 text-gray-900"
@@ -448,7 +448,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
               <p className="mt-3 text-sm leading-6 text-gray-600">
                 Write a message to run across the banner.
               </p>
-            </div>
+            </Card>
             <div className="col-span-6">
               <label className="block text-sm font-medium leading-6 text-gray-900">
                 Screens
@@ -535,7 +535,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
           <div>Are you sure you want to delete this exercise?</div>
         </Modal>
       )}
-      <div className="flex ">
+      <div className="flex">
         <div
           className={`fixed top-0 right-0 z-20 w-80 h-full transition-all duration-500 transform bg-white shadow-lg flex flex-col ${
             !showExDrawer && "translate-x-full"
@@ -561,7 +561,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                   form="search"
                   type="text"
                   id="simple-search"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-2 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-2 p-2.5 "
                   placeholder="Search exercise name..."
                   value={search}
                   onChange={(e) => {
@@ -578,7 +578,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                   e.preventDefault();
                   fetchExercises();
                 }}
-                className="p-2.5 ml-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                className="p-2.5 ml-2 text-sm font-medium text-white bg-blue-700 rounded-lg border border-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300"
               >
                 <svg
                   className="w-4 h-4"
@@ -648,7 +648,6 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                 setSelectedExerciseForEdit(null);
                 setSelectedExercise(null);
               }}
-              disabled={selectedExercise == null}
               type="button"
               className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
@@ -670,7 +669,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
             {exercises
               ?.sort((a: Exercise, b: Exercise) => (a.name > b.name ? 1 : -1))
               .map((p: Exercise, i: number) => (
-                <div
+                <Card
                   key={`exercise-${i}`}
                   className={`w-full relative bg-gradient-to-r from-powder to-powder-300 flex align-middle items-center justify-start p-3 rounded-md ${
                     selectedExercise?.id === p.id
@@ -685,9 +684,15 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                     <span className="text-md w-100">
                       {p.name.toLowerCase()}
                     </span>
-                    <video controls src={p.videoUrl} preload="metadata"></video>
+                    <video
+                      controls
+                      src={p.videoUrl}
+                      preload="metadata"
+                      playsInline
+                      muted
+                    ></video>
                   </div>
-                </div>
+                </Card>
               ))}
           </div>
         </div>

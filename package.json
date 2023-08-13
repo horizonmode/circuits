@@ -17,6 +17,7 @@
     "@headlessui/react": "^1.7.15",
     "@heroicons/react": "^2.0.18",
     "@microsoft/signalr": "^7.0.7",
+    "@tremor/react": "^3.6.1",
     "@types/node": "20.3.3",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",

@@ -15,7 +15,7 @@ namespace HorizonMode.GymScreens
     public static class Programmes
     {
 
-        public static ActiveProgramme ConvertToActiveProgramme(Programme programme)
+        public static ActiveProgramme ConvertToActiveProgramme(Programme programme, bool isPlaying)
         {
             var ap = new ActiveProgramme();
             ap.ActiveTime = programme.ActiveTime;
@@ -27,6 +27,7 @@ namespace HorizonMode.GymScreens
             ap.id = "active";
             ap.SourceWorkoutId = programme.id;
             ap.Message = programme.Message;
+            ap.IsPlaying = isPlaying;
 
             return ap;
         }
@@ -114,7 +115,7 @@ namespace HorizonMode.GymScreens
                 {
                     if (activeProgramme.SourceWorkoutId == updatedProgramme.id && activeProgramme.LastUpdated < updatedProgramme.LastUpdated)
                     {
-                        activeProgramme = ConvertToActiveProgramme(updatedProgramme);
+                        activeProgramme = ConvertToActiveProgramme(updatedProgramme, activeProgramme.IsPlaying);
                         await container.UpsertItemAsync<ActiveProgramme>(activeProgramme);
                     }
                 }
@@ -136,10 +137,13 @@ namespace HorizonMode.GymScreens
         {
             log.LogInformation($"SetActiveWorkout function processed");
 
-            activeProgramme = ConvertToActiveProgramme(programme);
+            bool isPlaying = string.IsNullOrEmpty(req.Query["isPlaying"]) ? true : bool.Parse(req.Query["isPlaying"]);
+
+            activeProgramme = ConvertToActiveProgramme(programme, isPlaying);
 
             return new OkObjectResult(activeProgramme);
         }
+
 
         [FunctionName("GetProgrammeById")]
         public static IActionResult GetProgrammeById([HttpTrigger(methods: "get", Route = "programme/{id}")] HttpRequest req,
@@ -217,29 +221,33 @@ namespace HorizonMode.GymScreens
                     return new BadRequestResult();
                 }
 
-                screenMap.Screen.id = screen.id;
-
-                var exercise1 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise1.id).AsEnumerable().FirstOrDefault();
-
-                if (exercise1 == null)
+                if (screenMap.Exercise1 != null)
                 {
-                    return new BadRequestResult();
-                }
+                    var exercise1 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise1.id).AsEnumerable().FirstOrDefault();
 
-                screenMap.Exercise1.Name = exercise1.Name;
-                screenMap.Exercise1.VideoUrl = exercise1.VideoUrl;
+                    if (exercise1 == null)
+                    {
+                        return new BadRequestResult();
+                    }
+
+                    screenMap.Exercise1.Name = exercise1.Name;
+                    screenMap.Exercise1.VideoUrl = exercise1.VideoUrl;
+                }
 
                 if (!screenMap.SplitScreen) continue;
 
-                var exercise2 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise2.id).AsEnumerable().FirstOrDefault();
-
-                if (exercise2 == null)
+                if (screenMap.Exercise2 != null)
                 {
-                    return new BadRequestResult();
-                }
+                    var exercise2 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise2.id).AsEnumerable().FirstOrDefault();
 
-                screenMap.Exercise2.Name = exercise2.Name;
-                screenMap.Exercise2.VideoUrl = exercise2.VideoUrl;
+                    if (exercise2 == null)
+                    {
+                        return new BadRequestResult();
+                    }
+
+                    screenMap.Exercise2.Name = exercise2.Name;
+                    screenMap.Exercise2.VideoUrl = exercise2.VideoUrl;
+                }
             }
 
             // Handle screen maps
@@ -285,27 +293,34 @@ namespace HorizonMode.GymScreens
 
                 screenMap.Screen.id = screen.id;
 
-                var exercise1 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise1.id).AsEnumerable().FirstOrDefault();
-
-                if (exercise1 == null)
+                if (screenMap.Exercise1 != null)
                 {
-                    return new BadRequestResult();
-                }
+                    var exercise1 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise1.id).AsEnumerable().FirstOrDefault();
 
-                screenMap.Exercise1.Name = exercise1.Name;
-                screenMap.Exercise1.VideoUrl = exercise1.VideoUrl;
+                    if (exercise1 == null)
+                    {
+                        return new BadRequestResult();
+                    }
+
+                    screenMap.Exercise1.Name = exercise1.Name;
+                    screenMap.Exercise1.VideoUrl = exercise1.VideoUrl;
+                }
 
                 if (!screenMap.SplitScreen) continue;
 
-                var exercise2 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise2.id).AsEnumerable().FirstOrDefault();
-
-                if (exercise2 == null)
+                if (screenMap.Exercise2 != null)
                 {
-                    return new BadRequestResult();
+                    var exercise2 = exerciseContainer.GetItemLinqQueryable<Exercise>(true).Where(t => t.id == screenMap.Exercise2.id).AsEnumerable().FirstOrDefault();
+
+                    if (exercise2 == null)
+                    {
+                        return new BadRequestResult();
+                    }
+
+                    screenMap.Exercise2.Name = exercise2.Name;
+                    screenMap.Exercise2.VideoUrl = exercise2.VideoUrl;
                 }
 
-                screenMap.Exercise2.Name = exercise2.Name;
-                screenMap.Exercise2.VideoUrl = exercise2.VideoUrl;
             }
 
             return new OkObjectResult(programme);

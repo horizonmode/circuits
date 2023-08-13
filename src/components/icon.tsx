@@ -1,5 +1,5 @@
 export type IconProps = {
-  type: "edit" | "add" | "del" | "open" | "play";
+  type: "edit" | "add" | "del" | "open" | "play" | "pause";
   onClick?: (() => void) | null;
   invert?: boolean;
 };
@@ -89,6 +89,22 @@ const open = (
   </svg>
 );
 
+const pause = (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+    strokeWidth={1.5}
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M15.75 5.25v13.5m-7.5-13.5v13.5"
+    />
+  </svg>
+);
+
 function Icon({ type, onClick, invert = false }: IconProps) {
   return (
     <div
@@ -97,8 +113,10 @@ function Icon({ type, onClick, invert = false }: IconProps) {
         e.preventDefault();
         onClick && onClick();
       }}
-      className={`w-10 h-10 border-2 border-black rounded-full cursor-pointer p-2 hover:bg-black hover:text-white ${
-        invert && "border-white text-white hover:bg-white hover:text-black"
+      className={`w-7 h-7  border-2 border-black rounded-tremor-full  cursor-pointer p-1 hover:bg-black ${
+        invert
+          ? "border-white text-white hover:bg-white hover:text-black"
+          : "hover:text-white"
       }`}
     >
       {type === "edit"
@@ -109,6 +127,8 @@ function Icon({ type, onClick, invert = false }: IconProps) {
         ? open
         : type === "play"
         ? play
+        : type === "pause"
+        ? pause
         : add}
     </div>
   );

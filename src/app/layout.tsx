@@ -3,7 +3,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 import { Disclosure } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import logo from "../assets/hfc.webp";
+import logo from "../assets/logo.png";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
@@ -14,19 +14,19 @@ const navigation = [
   {
     name: "Exercises",
     href: "/exercises",
-    regex: "^/exercises$",
+    regex: "^/exercises/?$",
     showInNav: true,
   },
   {
     name: "Edit Exercise",
     href: "/exercises/edit",
-    regex: "/exercises/edit/[a-z|0-9|-]",
+    regex: "/exercises/edit/.*",
     showInNav: false,
   },
   {
     name: "Edit Programme",
     href: "/programmes/edit",
-    regex: "/programmes/edit/[a-z|0-9|-]",
+    regex: "/programmes/edit/*",
     showInNav: false,
   },
   {
@@ -62,13 +62,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <meta http-equiv="Cache-control" content="no-cache" />
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+        />
         <script
           dangerouslySetInnerHTML={{ __html: "window.globalThis = window" }}
           type="text/javascript"
         />
       </head>
       <body className={inter.className}>
-        <div className="min-h-full">
+        <div className=" min-h-screen bg-tremor-background-muted">
           <Disclosure as="nav" className="bg-gray-800">
             {({ open }) => (
               <>
@@ -135,24 +140,26 @@ export default function RootLayout({
 
                 <Disclosure.Panel className="md:hidden">
                   <div className="space-y-1 px-2 pb-3 pt-2 sm:px-3">
-                    {navigation.map((item) => (
-                      <Disclosure.Button
-                        key={item.name}
-                        as="a"
-                        href={item.href}
-                        className={classNames(
-                          item.name === navItem?.name
-                            ? "bg-gray-900 text-white"
-                            : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                          "block rounded-md px-3 py-2 text-base font-medium"
-                        )}
-                        aria-current={
-                          item.name === navItem?.name ? "page" : undefined
-                        }
-                      >
-                        {item.name}
-                      </Disclosure.Button>
-                    ))}
+                    {navigation
+                      .filter((n) => n.showInNav)
+                      .map((item) => (
+                        <Disclosure.Button
+                          key={item.name}
+                          as="a"
+                          href={item.href}
+                          className={classNames(
+                            item.name === navItem?.name
+                              ? "bg-gray-900 text-white"
+                              : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                            "block rounded-md px-3 py-2 text-base font-medium"
+                          )}
+                          aria-current={
+                            item.name === navItem?.name ? "page" : undefined
+                          }
+                        >
+                          {item.name}
+                        </Disclosure.Button>
+                      ))}
                   </div>
                   <div className="border-t border-gray-700 pb-3 pt-4">
                     <div className="flex items-center px-5">
@@ -184,7 +191,7 @@ export default function RootLayout({
               </h1>
             </div>
           </header>
-          <main>
+          <main className=" ">
             <div className="mx-auto max-w-7xl py-6 px-6 lg:px-8">
               {children}
             </div>
