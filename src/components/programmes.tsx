@@ -346,6 +346,10 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     }
   };
 
+  useEffect(() => {
+    setPage(0);
+  }, [category]);
+
   return loading ? (
     <Loader />
   ) : (

@@ -22,6 +22,7 @@ export default function Admin() {
     );
     const data = await res.json();
     setProgrammes(data);
+    setLoading(false);
   };
 
   const fetchActiveProgramme = async () => {
@@ -38,7 +39,6 @@ export default function Admin() {
     setLoading(true);
     fetchProgrammes();
     fetchActiveProgramme();
-    setLoading(false);
   }, []);
 
   const setNewActive = (workoutId: string, isPlaying: boolean) => {
@@ -69,6 +69,17 @@ export default function Admin() {
     await fetchActiveProgramme();
   };
 
+  const duplicateProgramme = async (id: string) => {
+    await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/programme/duplicate/${id}?code=${process.env.NEXT_PUBLIC_API_KEY}`,
+      {
+        method: "GET",
+      }
+    );
+    await fetchProgrammes();
+    await fetchActiveProgramme();
+  };
+
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedProgrammeId, setSelectedProgrammeId] = useState<string>("");
 
@@ -77,8 +88,12 @@ export default function Admin() {
     setShowModal(true);
   };
 
+  const duplicate = (id: string) => {
+    duplicateProgramme(id);
+  };
+
   const router = useRouter();
-  console.log(activeProgramme);
+
   return (
     <main className="flex flex-col items-left align-left bg-tremor-background-muted">
       {loading ? (
@@ -121,6 +136,7 @@ export default function Admin() {
                     type="edit"
                     onClick={() => router.push(`/programmes/edit/?id=${p.id}`)}
                   />
+                  <Icon type="copy" onClick={() => duplicate(p.id)} />
                   <Icon type="del" onClick={() => selectForDelete(p.id)} />
                 </div>
               </Card>

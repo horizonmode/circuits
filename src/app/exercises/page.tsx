@@ -36,9 +36,14 @@ export default function Admin() {
     setExercises(data.results);
     setTotalCount(data.count);
   };
+
+  useEffect(() => {
+    setPage(0);
+  }, [category]);
+
   useEffect(() => {
     fetchExercises();
-  }, [num, page, category]);
+  }, [num, category]);
 
   const deleteExercise = async (id: string) => {
     await fetch(
