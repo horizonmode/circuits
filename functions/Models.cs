@@ -4,12 +4,6 @@ using Newtonsoft.Json;
 
 namespace HorizonMode.GymScreens
 {
-    public class TableKeys
-    {
-        public static string ProgrammeKey = "programme";
-        public static string ClientKey = "hfc";
-    }
-
     public class ActiveProgramme : Programme
     {
         public int CurrentActiveTime { get; set; }
@@ -31,6 +25,15 @@ namespace HorizonMode.GymScreens
         public int RestTime { get; set; }
         public string Message { get; set; }
         public List<ScreenMapping> Mappings { get; set; } = new List<ScreenMapping>();
+
+        public Programme Copy()
+        {
+
+            Programme duplicate = (Programme)this.MemberwiseClone();
+            duplicate.id = Guid.NewGuid().ToString();
+            duplicate.Name = $"{this.Name}_copy";
+            return duplicate;
+        }
     }
 
     public class ScreenMapping

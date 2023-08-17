@@ -7,10 +7,17 @@ using Microsoft.Extensions.Logging;
 
 namespace HorizonMode.GymScreens
 {
-    public static class signalR
+    public class SignalR
     {
+         private AblyPublisher _publisher;
+
+         public SignalR(AblyPublisher publisher)
+         {
+            _publisher = publisher;
+         }
+
         [FunctionName("negotiate")]
-        public static SignalRConnectionInfo Negotiate(
+        public SignalRConnectionInfo Negotiate(
             [HttpTrigger(AuthorizationLevel.Anonymous)] HttpRequest req,
             [SignalRConnectionInfo(HubName = "serverless_dev")] SignalRConnectionInfo connectionInfo)
         {
@@ -18,8 +25,7 @@ namespace HorizonMode.GymScreens
         }
 
         [FunctionName("broadcast")]
-        public static async Task Broadcast([TimerTrigger("* * * * * *")] TimerInfo myTimer,
-        [SignalR(HubName = "serverless_dev")] IAsyncCollector<SignalRMessage> signalRMessages,
+        public async Task Broadcast([TimerTrigger("* * * * * *")] TimerInfo myTimer,
         [CosmosDB(
                     databaseName: "screens",
                     containerName: "programmes",
@@ -43,15 +49,12 @@ namespace HorizonMode.GymScreens
             var mode = workout.CurrentActiveTime > 0 ? "active" : "rest";
             var timeLeft = workout.CurrentActiveTime <= 0 ? workout.CurrentRestTime-- : workout.CurrentActiveTime--;
 
-            await programmesOut.AddAsync(workout);
+            //await programmesOut.AddAsync(workout);
 
-            log.LogInformation($"{timeLeft}");
-            await signalRMessages.AddAsync(
-                new SignalRMessage
-                {
-                    Target = "newMessage",
-                    Arguments = new[] { $"{timeLeft}", $"{mode}", $"{workout.SourceWorkoutId}", workout.LastUpdated.ToString("s"), $"{workout.IsPlaying}" }
-                });
+            log.LogInformation($"TIMELEFT: {timeLeft}");
+
+            await _publisher.PublishUpdate(timeLeft, workout.LastUpdated, mode, workout.IsPlaying, workout.SourceWorkoutId);
+          
         }
     }
 }
