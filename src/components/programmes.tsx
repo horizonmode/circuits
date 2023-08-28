@@ -228,6 +228,11 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     setExercises(data.results);
     setTotalCount(data.count);
   };
+
+  useEffect(() => {
+    setPage(0);
+  }, [category, search]);
+
   useEffect(() => {
     fetchExercises();
   }, [num, page, category]);

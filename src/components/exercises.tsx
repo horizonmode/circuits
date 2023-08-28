@@ -57,6 +57,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
       setTitle(exercise.title);
       setVideoUrl(exercise.videoUrl);
       setVideoFileName(exercise.videoFileName);
+      setCategory(exercise.category);
     }
   }, [exercise]);
 
@@ -70,6 +71,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
     const upload = async (file: File) => {
       const data = new FormData();
       data.append("file", file);
+      console.log(file);
 
       try {
         await axios.put(
@@ -79,7 +81,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
             onUploadProgress,
             headers: {
               "x-ms-blob-type": "BlockBlob",
-              "Content-Type": "video/mp4",
+              "Content-Type": file.type,
             },
           }
         );

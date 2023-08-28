@@ -109,13 +109,13 @@ export default function Admin() {
                   activeProgramme === p.id ? "indigo" : "slate"
                 }`}
                 key={`programme-${i}`}
-                className={`shadow-md w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-10 rounded-md ${
+                className={`shadow-md w-full relative lg:w-1/2 h-20 bg-gradient-to-r flex align-middle items-center justify-start p-2 lg:p-10 rounded-md  flex-col lg:flex-row ${
                   activeProgramme === p.id
                     ? " from-powder to-powder-300"
                     : " from-gray-400 to-gray-50"
                 }`}
               >
-                <Title className="flex-1">{p.name}</Title>
+                <span className="flex-1 text-sm font-bold line-clamp-1 lg:text-lg">{p.name}</span>
                 <div className="flex flex-row justify-start gap-2">
                   {activeProgramme === p.id && (
                     <Badge icon={WifiIcon}>live</Badge>

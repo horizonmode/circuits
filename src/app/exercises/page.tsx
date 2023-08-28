@@ -39,11 +39,11 @@ export default function Admin() {
 
   useEffect(() => {
     setPage(0);
-  }, [category]);
+  }, [category, search]);
 
   useEffect(() => {
     fetchExercises();
-  }, [num, category]);
+  }, [num, category, page]);
 
   const deleteExercise = async (id: string) => {
     await fetch(
