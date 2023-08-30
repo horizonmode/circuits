@@ -76,6 +76,7 @@ namespace HorizonMode.GymScreens
                     foreach (var programme in programmes)
                     {
                         UpdateProgrammeWithExercise(programme, updatedExercise);
+                        await container.UpsertItemAsync<Programme>(programme);
                     }
 
                     if (activeProgramme != null)

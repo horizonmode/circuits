@@ -16,7 +16,7 @@ export default function Admin() {
   const [page, setPage] = useState<number>(0);
   const num = 10;
   const [search, setSearch] = useState<string>("");
-  const [category, setCategory] = useState<string>("back");
+  const [category, setCategory] = useState<string>("all");
   const [totalCount, setTotalCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -70,6 +70,10 @@ export default function Admin() {
   );
 
   const categoryOptions: DropDownOption[] = [
+    {
+      value: "all",
+      label: "all",
+    },
     {
       value: "back",
       label: "back",
@@ -297,7 +301,7 @@ export default function Admin() {
               Next
             </button>
           </div>
-          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+          <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between sm:max-w-full flex-wrap">
             <div>
               <p className="text-sm text-gray-700">
                 Showing <span className="font-medium">{page * num}</span> to{" "}
@@ -307,7 +311,7 @@ export default function Admin() {
             </div>
             <div>
               <nav
-                className="isolate inline-flex -space-x-px rounded-md shadow-sm"
+                className="isolate inline-flex -space-x-px rounded-md shadow-sm flex-wrap"
                 aria-label="Pagination"
               >
                 <button

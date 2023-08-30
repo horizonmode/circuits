@@ -212,7 +212,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
     ]);
   };
 
-  const [category, setCategory] = useState<string>("back");
+  const [category, setCategory] = useState<string>("all");
 
   const fetchExercises = async () => {
     const res = await fetch(
@@ -260,6 +260,10 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
   const [showExDrawer, setShowExDrawer] = useState(false);
 
   const categoryOptions: DropDownOption[] = [
+    {
+      value: "all",
+      label: "all",
+    },
     {
       value: "back",
       label: "back",

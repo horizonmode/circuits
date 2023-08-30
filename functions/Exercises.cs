@@ -115,13 +115,13 @@ namespace HorizonMode.GymScreens
             var numResults = exerciseContainer.GetItemLinqQueryable<Exercise>(
                       true
                    )
-                  .Where(ex => ex.Category == category && ex.Title.ToLower().Contains(search.ToLower()))
+                  .Where(ex => (category == "all" || ex.Category == category) && ex.Title.ToLower().Contains(search.ToLower()))
                    .Count();
 
             var results = exerciseContainer.GetItemLinqQueryable<Exercise>(
                        true
                     )
-                    .Where(ex => ex.Category == category && ex.Title.ToLower().Contains(search.ToLower()))
+                    .Where(ex => (category == "all" || ex.Category == category) && ex.Title.ToLower().Contains(search.ToLower()))
                     .Skip(page * num)
                     .Take(num)
                     .AsEnumerable()
@@ -155,14 +155,13 @@ namespace HorizonMode.GymScreens
 
             var numResults = exerciseContainer.GetItemLinqQueryable<Exercise>(
                        true
-                    )
-                    .Where(ex => ex.Category == category)
+                    ).Where(ex => category == "all" || ex.Category == category)
                     .Count();
 
             var results = exerciseContainer.GetItemLinqQueryable<Exercise>(
                        true
                     )
-                    .Where(ex => ex.Category == category)
+                    .Where(ex => category == "all" || ex.Category == category)
                     .Skip(page * num)
                     .Take(num)
                     .AsEnumerable()
