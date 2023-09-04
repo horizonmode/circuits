@@ -31,6 +31,21 @@ namespace HorizonMode.GymScreens
         public int RestTime { get; set; }
         public string Message { get; set; }
         public List<ScreenMapping> Mappings { get; set; } = new List<ScreenMapping>();
+
+        public Programme Clone()
+        {
+            var programme = new Programme
+            {
+                id = Guid.NewGuid().ToString(),
+                Name = this.Name + "_Copy",
+                ActiveTime = this.ActiveTime,
+                RestTime = this.RestTime,
+                Mappings = this.Mappings,
+                Message = this.Message
+            };
+
+            return programme;
+        }
     }
 
     public class ScreenMapping

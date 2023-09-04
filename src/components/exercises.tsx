@@ -13,6 +13,7 @@ import axios, { AxiosProgressEvent } from "axios";
 import Icon from "./icon";
 import DropDown, { DropDownOption } from "./dropdown";
 import { Card } from "@tremor/react";
+import { useRouter } from "next/navigation";
 
 export type SubmitStatus = "success" | "failed" | "waiting" | "submitting";
 
@@ -32,6 +33,7 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("waiting");
   const [loading, setLoading] = useState<boolean>(true);
+  const router = useRouter();
 
   const [exercise, setExercise] = useState<Exercise | null>(null);
   useEffect(() => {
@@ -355,7 +357,8 @@ export default function ExerciseForm({ exerciseId }: ExerciseFormProps) {
         {showModal && (
           <Modal
             title="Form Success"
-            onAccept={() => setShowModal(false)}
+            onAccept={() => {setShowModal(false);
+              submitStatus === "success" && router.push("/exercises");}}
             onCancel={() => setShowModal(false)}
             happy={submitStatus === "success"}
           >

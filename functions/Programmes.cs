@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.WebJobs;
+using Microsoft.Azure.WebJobs.Extensions.SignalRService;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -14,7 +15,6 @@ namespace HorizonMode.GymScreens
 {
     public static class Programmes
     {
-
         public static ActiveProgramme ConvertToActiveProgramme(Programme programme, bool isPlaying)
         {
             var ap = new ActiveProgramme();
@@ -95,6 +95,7 @@ namespace HorizonMode.GymScreens
             Connection = "CosmosDBConnection",
             LeaseConnection = "CosmosDBConnection",
             CreateLeaseContainerIfNotExists = true)]IReadOnlyList<Programme> programmes,
+            [SignalR(HubName = "serverless")] IAsyncCollector<SignalRMessage> signalRMessages,
             [CosmosDB(Connection = "CosmosDBConnection")] CosmosClient client, ILogger log)
         {
             if (programmes != null && programmes.Count > 0)
@@ -118,13 +119,22 @@ namespace HorizonMode.GymScreens
                     {
                         activeProgramme = ConvertToActiveProgramme(updatedProgramme, activeProgramme.IsPlaying);
                         await container.UpsertItemAsync<ActiveProgramme>(activeProgramme);
+
+                        await signalRMessages.AddAsync(
+                            new SignalRMessage
+                            {
+                                Target = "newProgramme",
+                                Arguments = new[] { $"{activeProgramme.SourceWorkoutId}", activeProgramme.LastUpdated.ToString("s"), $"{activeProgramme.IsPlaying}" }
+                            });
                     }
                 }
             }
         }
 
         [FunctionName("SetActiveProgramme")]
-        public static IActionResult SetActiveWorkout([HttpTrigger(methods: "get", Route = "programme/setActive/{id}")] HttpRequest req,
+        public static IActionResult SetActiveWorkout(
+            [HttpTrigger(methods: "get", Route = "programme/setActive/{id}")] HttpRequest req,
+            [SignalR(HubName = "serverless_dev")] IAsyncCollector<SignalRMessage> signalRMessages,
          [CosmosDB(
                 databaseName: "screens",
                 containerName: "programmes",
@@ -339,6 +349,26 @@ namespace HorizonMode.GymScreens
             await container.DeleteItemAsync<Programme>(id, new PartitionKey(id));
 
             return new OkResult();
+        }
+
+        [FunctionName("DuplicateProgramme")]
+        public static IActionResult DuplicateProgramme(
+            [HttpTrigger(methods: "get", Route = "programme/duplicate/{id}")] HttpRequest req,
+              [CosmosDB(
+                databaseName: "screens",
+                containerName: "programmes",
+                Id = "{id}",
+                PartitionKey ="{id}",
+                Connection = "CosmosDBConnection")] Programme programme,
+         [CosmosDB(
+                databaseName: "screens",
+                containerName: "programmes",
+                Connection = "CosmosDBConnection")] out Programme duplicatedProgramme, ILogger log)
+        {
+
+            duplicatedProgramme = programme.Clone();
+
+            return new OkObjectResult(duplicatedProgramme);
         }
     }
 }
