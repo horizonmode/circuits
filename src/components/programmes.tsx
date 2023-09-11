@@ -32,6 +32,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
   const [activeTime, setActiveTime] = useState<number>(0);
   const [restTime, setRestTime] = useState<number>(0);
   const [message, setMessage] = useState<string>("");
+  const [rounds, setRounds] = useState<number>(1);
   const mode = programmeId ? "edit" : "create";
 
   const [submitStatus, setSubmitStatus] = useState<SubmitStatus>("waiting");
@@ -68,6 +69,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       setRestTime(programme.restTime);
       setMessage(programme.message || "");
       setScreenMaps(programme.mappings);
+      setRounds(programme.rounds);
     }
   }, [programme, setActiveTime]);
 
@@ -96,6 +98,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
       activeTime,
       restTime,
       message,
+      rounds,
       id: programmeId || "",
       sourceWorkoutId: "",
       mappings: screenMaps,
@@ -128,6 +131,10 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
         break;
       case "message": {
         setMessage((e.target as any).value);
+        break;
+      }
+      case "rounds": {
+        setRounds((e.target as any).value);
         break;
       }
     }
@@ -418,7 +425,7 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
               </div>
               <div className="col-span-6 lg:col-span-3">
                 <label
-                  htmlFor="name"
+                  htmlFor="restTime"
                   className="block text-sm font-medium leading-6 text-gray-900"
                 >
                   Rest Time
@@ -436,6 +443,30 @@ export default function ProgrammeForm({ programmeId }: ProgrammeFormProps) {
                       required
                       value={restTime}
                       onChange={(e) => onInputChange("restTime", e)}
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="col-span-6 lg:col-span-3">
+                <label
+                  htmlFor="rounds"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Rounds
+                </label>
+                <div className="mt-2">
+                  <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                    <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm"></span>
+                    <input
+                      type="number"
+                      name="rounds"
+                      id="rounds"
+                      autoComplete="rounds"
+                      className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                      placeholder="1"
+                      required
+                      value={rounds}
+                      onChange={(e) => onInputChange("rounds", e)}
                     />
                   </div>
                 </div>

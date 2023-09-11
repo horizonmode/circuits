@@ -30,6 +30,7 @@ namespace HorizonMode.GymScreens
         public int ActiveTime { get; set; }
         public int RestTime { get; set; }
         public string Message { get; set; }
+        public int Rounds { get; set; }
         public List<ScreenMapping> Mappings { get; set; } = new List<ScreenMapping>();
 
         public Programme Clone()
@@ -41,7 +42,8 @@ namespace HorizonMode.GymScreens
                 ActiveTime = this.ActiveTime,
                 RestTime = this.RestTime,
                 Mappings = this.Mappings,
-                Message = this.Message
+                Message = this.Message,
+                Rounds = this.Rounds
             };
 
             return programme;

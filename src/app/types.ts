@@ -17,6 +17,7 @@ export interface Programme extends Dto {
   sourceWorkoutId: string;
   lastUpdated: Date;
   isPlaying: boolean;
+  rounds: number;
 }
 
 export interface ScreenMapping {

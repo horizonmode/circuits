@@ -28,6 +28,7 @@ namespace HorizonMode.GymScreens
             ap.SourceWorkoutId = programme.id;
             ap.Message = programme.Message;
             ap.IsPlaying = isPlaying;
+            ap.Rounds = programme.Rounds;
 
             return ap;
         }
