@@ -32,9 +32,7 @@ function FileUploadSingle() {
   return (
     <div>
       <input type="file" onChange={handleFileChange} />
-
       <div>{file && `${file.name} - ${file.type}`}</div>
-
       <button onClick={handleUploadClick}>Upload</button>
     </div>
   );

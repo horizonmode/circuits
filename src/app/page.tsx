@@ -115,7 +115,9 @@ export default function Admin() {
                     : " from-gray-400 to-gray-50"
                 }`}
               >
-                <span className="flex-1 text-sm font-bold line-clamp-1 lg:text-lg">{p.name}</span>
+                <span className="flex-1 text-sm font-bold line-clamp-1 lg:text-lg">
+                  {p.name}
+                </span>
                 <div className="flex flex-row justify-start gap-2">
                   {activeProgramme === p.id && (
                     <Badge icon={WifiIcon}>live</Badge>
