@@ -4,12 +4,6 @@ using Newtonsoft.Json;
 
 namespace HorizonMode.GymScreens
 {
-    public class TableKeys
-    {
-        public static string ProgrammeKey = "programme";
-        public static string ClientKey = "hfc";
-    }
-
     public class ActiveProgramme : Programme
     {
         public int CurrentActiveTime { get; set; }

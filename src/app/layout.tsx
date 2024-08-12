@@ -47,10 +47,6 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-export const metadata = {
-  title: "HFC Screens",
-  description: "HFC Screens",
-};
 
 export default function RootLayout({
   children,
